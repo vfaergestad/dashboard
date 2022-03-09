@@ -330,7 +330,13 @@ export default {
             <span v-else>{{ parent.displayName }}:</span>
             <span v-if="value.detailPageHeaderActionOverride && value.detailPageHeaderActionOverride(realMode)">{{ value.detailPageHeaderActionOverride(realMode) }}</span>
             <t v-else :k="'resourceDetail.header.' + realMode" :subtype="resourceSubtypeString" :name="value.nameDisplay" />
-            <BadgeState v-if="!isCreate && parent.showState" class="masthead-state" :value="value" />
+            <component
+              :is="value.componentForBadge"
+              v-if="value.detailPageHeaderBadgeOverride && !isCreate && parent.showState"
+              :value="value.detailPageHeaderBadgeOverride"
+              class="masthead-state"
+            />
+            <BadgeState v-else-if="!isCreate && parent.showState" class="masthead-state" :value="value" />
           </h1>
         </div>
         <div v-if="!isCreate" class="subheader">
