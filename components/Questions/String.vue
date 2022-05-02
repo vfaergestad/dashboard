@@ -32,6 +32,7 @@ export default {
         :required="question.required"
         :value="value"
         :disabled="disabled"
+        :tooltip="question.tooltip"
         @input="$emit('input', $event)"
       />
       <h4 v-else class="mt-20">

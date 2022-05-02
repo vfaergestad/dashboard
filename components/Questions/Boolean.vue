@@ -16,6 +16,7 @@ export default {
         :label="displayLabel"
         :value="value"
         :disabled="disabled"
+        :tooltip="question.tooltip"
         @input="$emit('input', $event)"
       />
     </div>
