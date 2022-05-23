@@ -14,6 +14,17 @@ export const ADMISSION_POLICY_STATE = {
   formatter: 'PolicyStatus',
 };
 
+export const RELATED_POLICY_SUMMARY = {
+  name:      'summary',
+  label:     'Policies',
+  value:     'allRelatedPolicies.length',
+  sort:      false,
+  search:    false,
+  formatter: 'PolicySummaryGraph',
+  align:     'center',
+  width:     100,
+};
+
 export function init(store) {
   const {
     product,
@@ -89,6 +100,7 @@ export function init(store) {
   headers(POLICY_SERVER, [
     STATE,
     NAME_HEADER,
+    RELATED_POLICY_SUMMARY,
     {
       name:          'kubewardenPolicyServers',
       label:         'Image',
