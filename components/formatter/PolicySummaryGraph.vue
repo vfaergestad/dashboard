@@ -41,8 +41,8 @@ export default {
       const out = {};
 
       for ( const r of this.relatedPolicies ) {
-        const textColor = colorForStatus(r);
         const state = r.status?.policyStatus;
+        const textColor = colorForStatus(state);
         const key = `${ textColor }/${ state }`;
 
         if ( out[key] ) {

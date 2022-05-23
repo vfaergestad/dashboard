@@ -221,8 +221,8 @@ export default class KubewardenModel extends SteveModel {
   }
 }
 
-export function colorForStatus(policy) {
-  switch ( policy.status?.policyStatus ) {
+export function colorForStatus(status) {
+  switch ( status ) {
   case 'unschedulable':
     return 'text-error';
   case 'pending':
