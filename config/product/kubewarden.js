@@ -100,7 +100,6 @@ export function init(store) {
   headers(POLICY_SERVER, [
     STATE,
     NAME_HEADER,
-    RELATED_POLICY_SUMMARY,
     {
       name:          'kubewardenPolicyServers',
       label:         'Image',
@@ -113,6 +112,7 @@ export function init(store) {
         }
       },
     },
+    RELATED_POLICY_SUMMARY,
     {
       name:      'psCreated',
       label:     'Created',
