@@ -45,6 +45,29 @@ export const TRACE_HEADERS = [
   }
 ];
 
+export const CATEGORY_MAP = [
+  {
+    label: 'All',
+    value: ''
+  },
+  {
+    label: '*',
+    value: 'Global'
+  },
+  {
+    label: 'Ingress',
+    value: 'Ingress'
+  },
+  {
+    label: 'Pod',
+    value: 'Pod'
+  },
+  {
+    label: 'Service',
+    value: 'Service'
+  }
+];
+
 export const OPERATION_MAP = {
   CREATE: 'bg-info',
   UPDATE: 'bg-warning',

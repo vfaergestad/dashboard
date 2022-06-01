@@ -4,13 +4,13 @@ import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import isEmpty from 'lodash/isEmpty';
 import { mapGetters } from 'vuex';
-import { NAMESPACE_SELECTOR, RESOURCE_MAP } from '@/plugins/kubewarden/policy-class';
+import { CATEGORY_MAP, NAMESPACE_SELECTOR, RESOURCE_MAP } from '@/plugins/kubewarden/policy-class';
 import ChartMixin from '@/mixins/chart';
 import CreateEditView from '@/mixins/create-edit-view';
 import {
   CATEGORY, _CREATE, CHART, REPO, REPO_TYPE, SEARCH_QUERY
 } from '@/config/query-params';
-import { KUBEWARDEN } from '@/config/types';
+import { KUBEWARDEN, NAMESPACE } from '@/config/types';
 import { saferDump } from '@/utils/create-yaml';
 import { ensureRegex } from '@/utils/string';
 import { sortBy } from '@/utils/sort';
@@ -23,6 +23,8 @@ import ResourceCancelModal from '@/components/ResourceCancelModal';
 import Select from '@/components/form/Select';
 import Tabbed from '@/components/Tabbed';
 import Wizard from '@/components/Wizard';
+
+import Registry from '@/edit/policies.kubewarden.io/Registry';
 import Values from '@/edit/policies.kubewarden.io/Values';
 
 import defaultPolicy from '@/.questions/defaultPolicy.json';
@@ -31,7 +33,15 @@ export default ({
   name: 'Create',
 
   components: {
-    ButtonGroup, LabeledSelect, Loading, ResourceCancelModal, Select, Tabbed, Wizard, Values
+    ButtonGroup,
+    LabeledSelect,
+    Loading,
+    ResourceCancelModal,
+    Select,
+    Tabbed,
+    Wizard,
+    Registry,
+    Values
   },
 
   props: {
@@ -71,57 +81,50 @@ export default ({
 
     this.searchQuery = query[SEARCH_QUERY] || '';
     this.category = query[CATEGORY] || '';
+
+    // initialize customRegistry object
+    this.customRegistry = {
+      insecure_sources:   [],
+      source_authorities: []
+    };
   },
 
   data() {
     return {
-      questions:    null,
-      errors:       null,
-      category:     null,
-      keywords:     [],
-      searchQuery:  null,
-      type:         null,
-      version:      null,
+      errors:            null,
+      category:          null,
+      keywords:          [],
+      questions:         null,
+      searchQuery:       null,
+      type:              null,
+      version:           null,
 
-      chartValues:  null,
-      yamlValues:   null,
+      customRegistry:    null,
+      chartValues:       null,
+      yamlValues:        null,
 
-      stepBasic: {
-        name:   'basics',
+      // Steps
+      stepRegistry: {
+        name:   'registry',
+        label:  'Registry',
+        ready:  true,
+        weight: 99
+      },
+      stepPolicies: {
+        hidden: false,
+        name:   'policies',
         label:  'Policies',
         ready:  false,
-        weight: 30
+        weight: 98
       },
       stepValues: {
         name:   'values',
         label:  'Values',
-        ready:  true,
-        weight: 20
+        ready:  false,
+        weight: 97
       },
 
-      categories: [
-        {
-          label: 'All',
-          value: ''
-        },
-        {
-          label: '*',
-          value: 'Global'
-        },
-        {
-          label: 'Ingress',
-          value: 'Ingress'
-        },
-        {
-          label: 'Pod',
-          value: 'Pod'
-        },
-        {
-          label: 'Service',
-          value: 'Service'
-        }
-      ],
-
+      CATEGORY_MAP,
       RESOURCE_MAP
     };
   },
@@ -182,11 +185,24 @@ export default ({
       return [...new Set(flattened)];
     },
 
+    secretNamespace() {
+      const tryNames = ['cattle-system', 'default'];
+
+      for ( const name of tryNames ) {
+        if ( this.$store.getters['cluster/byId'](NAMESPACE, name) ) {
+          return name;
+        }
+      }
+
+      return this.$store.getters['cluster/all'](NAMESPACE)[0]?.id;
+    },
+
     steps() {
       const steps = [];
 
       steps.push(
-        this.stepBasic,
+        this.stepRegistry,
+        this.stepPolicies,
         this.stepValues
       );
 
@@ -301,7 +317,7 @@ export default ({
       });
 
       this.policyQuestions();
-      this.stepBasic.ready = true;
+      this.stepPolicies.ready = true;
       this.$refs.wizard.next();
     },
   }
@@ -323,10 +339,15 @@ export default ({
       @cancel="cancel"
       @finish="finish"
     >
-      <template #basics>
+      <template #registry>
+        <Registry :value="customRegistry" />
+      </template>
+
+      <!-- For selecting policies from the Policy Hub -->
+      <template #policies>
         <form
           :is="( isView ? 'div' : 'form' )"
-          class="create-resource-container step__basic"
+          class="create-resource-container step__policies"
         >
           <div class="filter">
             <LabeledSelect
@@ -345,7 +366,7 @@ export default ({
               v-model="category"
               :clearable="true"
               :searchable="false"
-              :options="categories"
+              :options="CATEGORY_MAP"
               placement="bottom"
               class="filter__category"
               label="Filter by Resource Type"
@@ -400,7 +421,7 @@ export default ({
       </template>
 
       <template #values>
-        <Values :value="value" :chart-values="chartValues" :mode="mode" />
+        <Values :v-model="value" :chart-values="chartValues" :mode="mode" />
       </template>
     </Wizard>
   </div>
@@ -416,7 +437,7 @@ export default ({
   }
 
   .step {
-    &__basic {
+    &__policies {
       display: flex;
       flex-direction: column;
       flex: 1;
