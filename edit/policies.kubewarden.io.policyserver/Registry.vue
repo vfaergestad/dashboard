@@ -1,4 +1,5 @@
 <script>
+import isEmpty from 'lodash/isEmpty';
 import { _CREATE } from '@/config/query-params';
 
 import ArrayList from '@/components/form/ArrayList';
@@ -34,13 +35,66 @@ export default {
     RadioGroup
   },
 
+  fetch() {
+    this.customRegistry = {
+      insecure_sources:   [],
+      source_authorities: []
+    };
+  },
+
   data() {
     const descriptionLabel = 'The PolicyServer allows you to pull policies from OCI registries and HTTP servers, by default HTTPS is enforced with host TLS verification. You can interact with registries using untrusted certificates or even without TLS by using the `insecure_sources` setting. This approach is highly discouraged in environments closer to production.';
 
-    return { descriptionLabel, hasCustomRegistry: false };
+    return {
+      descriptionLabel,
+
+      customRegistry:    null,
+      hasCustomRegistry: false
+    };
   },
 
-  methods: { onCrtSelected: createOnSelected('crt') }
+  methods: {
+    onCrtSelected: createOnSelected('crt'),
+
+    handleCustomRegistry() {
+      this.$emit('hasCustomRegistry', this.hasCustomRegistry);
+    },
+
+    updateChartValues() {
+      const { insecure_sources, source_authorities } = this.customRegistry; // eslint-disable-line camelcase
+      const { spec } = this.chartValues?.policy; // this needs to be refactored to PolicyServer
+
+      if ( insecure_sources && isEmpty(spec?.insecure_sources) ) { // eslint-disable-line camelcase
+        this.$set(spec, 'insecure_sources', insecure_sources);
+      }
+
+      if ( source_authorities && isEmpty(spec?.source_authorities) ) { // eslint-disable-line camelcase
+        const out = source_authorities.map((s) => {
+          const { type, uri } = s;
+
+          if ( type === 'Path' ) {
+            return {
+              [uri]: {
+                type,
+                path: s.path
+              }
+            };
+          }
+
+          if ( type === 'Data' ) {
+            return {
+              [uri]: {
+                type,
+                data: s.data
+              }
+            };
+          }
+        });
+
+        this.$set(spec, 'source_authorities', out);
+      }
+    },
+  }
 };
 </script>
 
@@ -62,6 +116,7 @@ export default {
         label="Custom Registry"
         :labels="['No', 'Yes']"
         tooltip="use that policy hub ya dingus"
+        @input="handleCustomRegistry"
       />
 
       <template v-if="hasCustomRegistry">
@@ -101,6 +156,7 @@ export default {
                     title="Source Authorities"
                     label="Registry URI"
                     :mode="mode"
+                    required
                   />
                 </div>
               </div>

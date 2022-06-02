@@ -53,6 +53,7 @@ export function init(store) {
     CLUSTER_ADMISSION_POLICY,
   ]);
 
+  // These are policies from the Policy Hub
   spoofedType({
     label:   'Policies',
     type:    SPOOFED.POLICIES,

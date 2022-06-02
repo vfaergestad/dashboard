@@ -10,37 +10,37 @@ import CreateEditView from '@/mixins/create-edit-view';
 import {
   CATEGORY, _CREATE, CHART, REPO, REPO_TYPE, SEARCH_QUERY
 } from '@/config/query-params';
-import { KUBEWARDEN, NAMESPACE } from '@/config/types';
+import { KUBEWARDEN } from '@/config/types';
 import { saferDump } from '@/utils/create-yaml';
 import { ensureRegex } from '@/utils/string';
 import { sortBy } from '@/utils/sort';
 import { set } from '@/utils/object';
 
-import ButtonGroup from '@/components/ButtonGroup';
+import Banner from '@/components/Banner';
 import LabeledSelect from '@/components/form/LabeledSelect';
+import ButtonGroup from '@/components/ButtonGroup';
 import Loading from '@/components/Loading';
+import RadioGroup from '@/components/form/RadioGroup';
 import ResourceCancelModal from '@/components/ResourceCancelModal';
 import Select from '@/components/form/Select';
 import Tabbed from '@/components/Tabbed';
 import Wizard from '@/components/Wizard';
 
-import Registry from '@/edit/policies.kubewarden.io/Registry';
 import Values from '@/edit/policies.kubewarden.io/Values';
-
-import defaultPolicy from '@/.questions/defaultPolicy.json';
 
 export default ({
   name: 'Create',
 
   components: {
+    Banner,
     ButtonGroup,
     LabeledSelect,
     Loading,
+    RadioGroup,
     ResourceCancelModal,
     Select,
     Tabbed,
     Wizard,
-    Registry,
     Values
   },
 
@@ -72,6 +72,8 @@ export default ({
       console.error(`Error importing questions ${ e }`); // eslint-disable-line no-console
     }
 
+    const defaultPolicy = require(`@/.questions/policies/defaultPolicy.json`);
+
     this.yamlValues = saferDump(defaultPolicy);
 
     this.value.apiVersion = `${ this.schema?.attributes?.group }.${ this.schema?.attributes?.version }`;
@@ -81,12 +83,6 @@ export default ({
 
     this.searchQuery = query[SEARCH_QUERY] || '';
     this.category = query[CATEGORY] || '';
-
-    // initialize customRegistry object
-    this.customRegistry = {
-      insecure_sources:   [],
-      source_authorities: []
-    };
   },
 
   data() {
@@ -99,9 +95,10 @@ export default ({
       type:              null,
       version:           null,
 
-      customRegistry:    null,
       chartValues:       null,
       yamlValues:        null,
+
+      hasCustomRegistry: false,
 
       // Steps
       stepRegistry: {
@@ -120,7 +117,7 @@ export default ({
       stepValues: {
         name:   'values',
         label:  'Values',
-        ready:  false,
+        ready:  true,
         weight: 97
       },
 
@@ -131,6 +128,21 @@ export default ({
 
   provide() {
     return { chartType: this.value.type };
+  },
+
+  watch: {
+    hasCustomRegistry(neu, old) {
+      if ( !old ) {
+        this.policyQuestions(neu);
+      }
+
+      this.$set(this.stepPolicies, 'hidden', neu);
+    }
+  },
+
+  created() {
+    this.chartValues = null;
+    this.yamlValues = null;
   },
 
   computed: {
@@ -183,18 +195,6 @@ export default ({
       });
 
       return [...new Set(flattened)];
-    },
-
-    secretNamespace() {
-      const tryNames = ['cattle-system', 'default'];
-
-      for ( const name of tryNames ) {
-        if ( this.$store.getters['cluster/byId'](NAMESPACE, name) ) {
-          return name;
-        }
-      }
-
-      return this.$store.getters['cluster/all'](NAMESPACE)[0]?.id;
     },
 
     steps() {
@@ -277,8 +277,8 @@ export default ({
       }
     },
 
-    policyQuestions() {
-      const shortType = this.type.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
+    policyQuestions(isCustom) {
+      const shortType = !!isCustom ? 'defaultPolicy' : this.type?.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, '');
       const match = require(`@/.questions/policies/${ shortType }.json`);
 
       if ( match ) {
@@ -319,7 +319,7 @@ export default ({
       this.policyQuestions();
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
-    },
+    }
   }
 
 });
@@ -340,7 +340,26 @@ export default ({
       @finish="finish"
     >
       <template #registry>
-        <Registry :value="customRegistry" />
+        <div class="row mt-10">
+          <div class="col span-12">
+            <Banner
+              class="type-banner mb-20 mt-0"
+              color="info"
+              label="The PolicyServer allows you to pull policies from OCI registries and HTTP servers, by default HTTPS is enforced with host TLS verification."
+            />
+
+            <RadioGroup
+              v-model="hasCustomRegistry"
+              name="hasCustomRegistry"
+              :options="[false, true]"
+              :mode="mode"
+              class="mb-20"
+              label="Custom Registry"
+              :labels="['No', 'Yes']"
+              tooltip="If 'No' is selected you will be given a currated list of policies to choose from."
+            />
+          </div>
+        </div>
       </template>
 
       <!-- For selecting policies from the Policy Hub -->
@@ -421,7 +440,7 @@ export default ({
       </template>
 
       <template #values>
-        <Values :v-model="value" :chart-values="chartValues" :mode="mode" />
+        <Values :value="value" :chart-values="chartValues" :mode="mode" />
       </template>
     </Wizard>
   </div>
