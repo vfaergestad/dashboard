@@ -1,11 +1,12 @@
 <script>
-import ResourceTable from '@/components/ResourceTable';
+import Banner from '@/components/Banner';
 import Loading from '@/components/Loading';
+import ResourceTable from '@/components/ResourceTable';
 import Select from '@/components/form/Select';
 
 export default {
   components: {
-    Loading, ResourceTable, Select
+    Banner, Loading, ResourceTable, Select
   },
 
   props: {
@@ -142,6 +143,12 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
+    <Banner
+      class="type-banner mb-20 mt-0"
+      color="info"
+      label="ClusterAdmissionPolicy is a cluster-wide resource. These policies will process all requests within the cluster where the ClusterAdmissionPolicy is defined."
+    />
+
     <div class="row mb-20">
       <div class="span-3 mr-10">
         <span>Resources</span>

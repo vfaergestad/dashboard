@@ -1,9 +1,12 @@
 <script>
-import ResourceTable from '@/components/ResourceTable';
+import Banner from '@/components/Banner';
 import Loading from '@/components/Loading';
+import ResourceTable from '@/components/ResourceTable';
 
 export default {
-  components: { Loading, ResourceTable },
+  components: {
+    Banner, Loading, ResourceTable
+  },
 
   props: {
     resource: {
@@ -36,6 +39,11 @@ export default {
 <template>
   <Loading v-if="$fetchState.pending" />
   <div v-else>
+    <Banner
+      class="type-banner mb-20 mt-0"
+      color="info"
+      label="AdmissionPolicy is a namespace-wide resource. These policies will process only the requests that are targeting the Namespace where the AdmissionPolicy is defined."
+    />
     <ResourceTable :schema="schema" :rows="rows" :headers="headers">
       <template #col:mode="{ row }">
         <td>
