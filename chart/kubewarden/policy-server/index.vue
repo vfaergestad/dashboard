@@ -1,10 +1,12 @@
 <script>
 import { _CREATE } from '@/config/query-params';
 
+import Tab from '@/components/Tabbed/Tab';
+
 import General from '@/chart/kubewarden/policy-server/General';
 import Labels from '@/chart/kubewarden/policy-server/Labels';
+import Registry from '@/chart/kubewarden/policy-server/Registry/Index';
 import Verification from '@/chart/kubewarden/policy-server/Verification';
-import Tab from '@/components/Tabbed/Tab';
 
 export default {
   props: {
@@ -20,7 +22,7 @@ export default {
   },
 
   components: {
-    General, Labels, Tab, Verification
+    General, Labels, Tab, Registry, Verification
   },
 
   data() {
@@ -51,6 +53,9 @@ export default {
     </Tab>
     <Tab name="verification" label="Verification" :weight="97">
       <Verification :value="chartValues.spec" :namespace="targetNamespace" :mode="mode" />
+    </Tab>
+    <Tab name="registry" label="Container Registry" :weight="97">
+      <Registry :value="chartValues.spec" :mode="mode" />
     </Tab>
   </div>
 </template>
