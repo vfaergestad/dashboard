@@ -2,8 +2,8 @@
 import { _CREATE } from '@/config/query-params';
 
 import ArrayList from '@/components/form/ArrayList';
-import ArrayListGrouped from '@/components/form/ArrayListGrouped';
 import Banner from '@/components/Banner';
+import KeyValue from '@/components/form/KeyValue';
 
 import Certificate from './Certificate';
 
@@ -16,7 +16,7 @@ export default {
       default: _CREATE
     },
 
-    // chartValues
+    // chartValues.spec
     value: {
       type:     Object,
       required: true
@@ -25,8 +25,8 @@ export default {
 
   components: {
     ArrayList,
-    ArrayListGrouped,
     Banner,
+    KeyValue,
     Certificate
   },
 
@@ -42,6 +42,14 @@ export default {
       configureRegistry: false,
       customRegistry:    null
     };
+  },
+
+  methods: {
+    setAuthorities(val) {
+      const all = this.value.sourceAuthorities || {};
+
+      this.$set(this.value, 'sourceAuthorities', { ...all, ...val });
+    },
   }
 };
 </script>
@@ -76,12 +84,10 @@ export default {
     <div class="spacer"></div>
 
     <template>
-      <h3 class="mb-20">
-        Source Authorities
-      </h3>
       <div class="row mb-20">
         <div class="col span-12">
-          <ArrayListGrouped
+          <Certificate v-model="value.sourceAuthorities" :mode="mode" />
+          <!-- <ArrayListGrouped
             v-model="value.sourceAuthorities"
             :mode="mode"
             :default-add-value="defaultSourceAuthority"
@@ -90,7 +96,23 @@ export default {
             <template v-for="(key, index) in value.sourceAuthorities">
               <Certificate :key="index" v-model="value.sourceAuthorities[index]" :mode="mode" />
             </template>
-          </ArrayListGrouped>
+          </ArrayListGrouped> -->
+          <!-- <KeyValue
+            key="sourceAuthorities"
+            :value="value.sourceAuthorities"
+            add-label="Add Source Authority"
+            :as-map="true"
+            :mode="mode"
+            title="Source Authorities"
+            :read-allowed="true"
+            :read-key-unique="true"
+            :value-can-be-empty="false"
+            @input="setAuthorities($event)"
+          >
+            <template #add>
+              <Certificate v-model="value.sourceAuthorities" :mode="mode" />
+            </template>
+          </KeyValue> -->
         </div>
       </div>
     </template>

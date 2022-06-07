@@ -403,14 +403,13 @@ export default ({
               class="input-sm filter__search"
               :placeholder="t('catalog.charts.search')"
             >
-
             <button
               ref="btn"
               class="btn, btn-sm, role-primary"
               type="button"
               @click="refresh"
             >
-              <i class="icon, icon-lg, icon-close" />
+              Reset Filter
             </button>
           </div>
 
@@ -548,13 +547,17 @@ export default ({
 
       &__metadata {
         padding: $margin;
+
+        &__label, &__description {
+          padding-right: 20px;
+        }
       }
 
       &__badge {
         position: absolute;
         right: 0;
         top: 0;
-        padding: 2px 10px;
+        padding: 2px $padding;
         border-bottom-left-radius: var(--border-radius);
 
         label {
@@ -574,7 +577,7 @@ export default ({
         overflow: hidden;
         text-overflow: ellipsis;
         margin-top: 20px;
-        margin-bottom: 0;
+        margin-bottom: 4px;
         line-height: initial;
       }
 

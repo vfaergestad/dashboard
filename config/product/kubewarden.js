@@ -22,7 +22,6 @@ export const RELATED_POLICY_SUMMARY = {
   search:    false,
   formatter: 'PolicySummaryGraph',
   align:     'center',
-  width:     100,
 };
 
 export function init(store) {
@@ -115,8 +114,8 @@ export function init(store) {
     },
     RELATED_POLICY_SUMMARY,
     {
-      name:      'psCreated',
-      label:     'Created',
+      name:      'psAge',
+      label:     'Age',
       value:     'metadata.creationTimestamp',
       formatter: 'LiveDate'
     }

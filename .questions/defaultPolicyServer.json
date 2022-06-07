@@ -27,6 +27,7 @@
     "verificationConfig": "",
     "insecureSources": [
       ""
-    ]
+    ],
+    "sourceAuthorities": {}
   }
 }
