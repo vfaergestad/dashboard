@@ -25,9 +25,7 @@
     "replicas": 1,
     "serviceAccountName": "policy-server",
     "verificationConfig": "",
-    "insecureSources": [
-      ""
-    ],
-    "sourceAuthorities": {}
+    "insecureSources": [],
+    "sourceAuthorities": null
   }
 }

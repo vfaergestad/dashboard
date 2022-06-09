@@ -3,7 +3,6 @@ import { _CREATE } from '@/config/query-params';
 
 import ArrayList from '@/components/form/ArrayList';
 import Banner from '@/components/Banner';
-import KeyValue from '@/components/form/KeyValue';
 
 import Certificate from './Certificate';
 
@@ -26,30 +25,13 @@ export default {
   components: {
     ArrayList,
     Banner,
-    KeyValue,
     Certificate
   },
 
   data() {
     const descriptionLabel = 'The PolicyServer allows you to pull policies from OCI registries and HTTP servers, by default HTTPS is enforced with host TLS verification. You can interact with registries using untrusted certificates or even without TLS by using the `insecureSources` setting. This approach is highly discouraged in environments closer to production.';
 
-    const defaultSourceAuthority = { uri: null, data: null };
-
-    return {
-      descriptionLabel,
-      defaultSourceAuthority,
-
-      configureRegistry: false,
-      customRegistry:    null
-    };
-  },
-
-  methods: {
-    setAuthorities(val) {
-      const all = this.value.sourceAuthorities || {};
-
-      this.$set(this.value, 'sourceAuthorities', { ...all, ...val });
-    },
+    return { descriptionLabel };
   }
 };
 </script>
@@ -87,32 +69,6 @@ export default {
       <div class="row mb-20">
         <div class="col span-12">
           <Certificate v-model="value.sourceAuthorities" :mode="mode" />
-          <!-- <ArrayListGrouped
-            v-model="value.sourceAuthorities"
-            :mode="mode"
-            :default-add-value="defaultSourceAuthority"
-            add-label="Add Source Authority"
-          >
-            <template v-for="(key, index) in value.sourceAuthorities">
-              <Certificate :key="index" v-model="value.sourceAuthorities[index]" :mode="mode" />
-            </template>
-          </ArrayListGrouped> -->
-          <!-- <KeyValue
-            key="sourceAuthorities"
-            :value="value.sourceAuthorities"
-            add-label="Add Source Authority"
-            :as-map="true"
-            :mode="mode"
-            title="Source Authorities"
-            :read-allowed="true"
-            :read-key-unique="true"
-            :value-can-be-empty="false"
-            @input="setAuthorities($event)"
-          >
-            <template #add>
-              <Certificate v-model="value.sourceAuthorities" :mode="mode" />
-            </template>
-          </KeyValue> -->
         </div>
       </div>
     </template>

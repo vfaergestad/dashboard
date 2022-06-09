@@ -1,14 +1,12 @@
 <script>
-import map from 'lodash/map';
+import isEmpty from 'lodash/isEmpty';
 import { _CREATE, _EDIT, _VIEW } from '@/config/query-params';
 import { removeAt } from '@/utils/array';
-import { base64Decode } from '@/utils/crypto';
-import { set } from '@/utils/object';
+import { randomStr } from '~/utils/string';
 
 import FileSelector, { createOnSelected } from '@/components/form/FileSelector';
 import InfoBox from '@/components/InfoBox';
 import LabeledInput from '@/components/form/LabeledInput';
-import ArrayListGrouped from '~/components/form/ArrayListGrouped.vue';
 
 export default {
   props: {
@@ -17,10 +15,10 @@ export default {
       default: _CREATE
     },
 
-    // sourceAuthorities
+    // chartValues.spec.sourceAuthorities
     value: {
-      type:    Object,
-      default: () => {}
+      type:     [Map, Object],
+      default:  null
     }
   },
 
@@ -28,19 +26,16 @@ export default {
     FileSelector,
     InfoBox,
     LabeledInput,
-    ArrayListGrouped
   },
 
-  // add a default object with a uri as the key and an array as the value
-  data() {
-    const crt = this.decodedData['data'] || '';
-    const sourcesArray = map(this.value, 'v');
+  /*
+    ~~~Incomplete~~~
+  */
 
+  data() {
     return {
-      crt,
-      allCrt: [],
-      uri:    null,
-      sourcesArray,
+      certificateObj:  {},
+      registryList:    [],
     };
   },
 
@@ -51,33 +46,45 @@ export default {
 
     isView() {
       return this.mode === _VIEW;
+    },
+
+    // If this.value arrives as an object, need to create a Map type out of it
+    sourceAuthoritiesMap() {
+      if ( this.value ) {
+        const map = new Map();
+
+        return map.set(this.value);
+      }
+
+      return null;
     }
   },
 
   methods: {
-    onCrtSelected: createOnSelected('crt'),
-
-    add() {
-      this.sourcesArray.push({});
-    },
-
-    decodedData() {
-      const out = {};
-
-      for ( const k in this.value || {} ) {
-        out[k] = base64Decode( this.value[k] );
+    addCertificate(index) {
+      if ( this.certificateObj[index] ) {
+        return this.certificateObj[index].push('');
       }
 
-      return out;
+      this.$set(this.certificateObj, [index], ['']);
     },
 
-    remove(index) {
-      removeAt(this.sourcesArray, index);
-    }
+    addRegistry() {
+      this.registryList.push('');
+    },
 
-    // updateCert() {
-    //   this.allCrt.push(this.crt);
-    // }
+    // If selected replace what's in the data field with the file
+    handleSelectFile(event, registryIndex, certIndex) {
+      createOnSelected('crt');
+
+      const data = this.certificateObj[registryIndex];
+
+      data.splice(certIndex, 1, event);
+    },
+
+    remove(source, index) {
+      removeAt(source, index);
+    },
   },
 };
 </script>
@@ -87,49 +94,67 @@ export default {
     <div class="col span-12">
       <h3>Source Authorities</h3>
 
-      <template v-for="(authority, key, index) in sourcesArray">
-        <InfoBox :key="index" class="p-20 sources__container">
-          <LabeledInput
-            v-model="authority[key]"
-            type="multiline"
-            label="Registry URI endpoint"
-            class="mb-20"
-            :mode="mode"
-            placeholder="registry-pre.example.com:5500"
-          />
-
-          <template>
-            <ArrayListGrouped
-              v-model="authority.value"
+      <template v-for="(registry, registryIndex) in registryList">
+        <InfoBox :key="registryIndex" class="p-20 sources__container">
+          <div>
+            <LabeledInput
+              v-model="registryList[registryIndex]"
+              type="multiline"
+              label="Registry URI endpoint"
+              class="mb-20"
               :mode="mode"
-              :add-allowed="true"
-              add-label="Add Certificate"
-            >
-              <template #default="props">
-                <LabeledInput
-                  v-model="props.row.value"
-                  type="multiline"
-                  label="Certificate"
-                  class="p-10"
-                  :mode="mode"
-                  required
-                  :placeholder="t('secret.certificate.certificatePlaceholder')"
-                />
-                <FileSelector
-                  v-model="props.row.value"
-                  class="btn btn-sm bg-primary mt-10"
-                  :label="t('generic.readFromFile')"
-                  @selected="onCrtSelected"
-                />
+              placeholder="registry-pre.example.com:5500"
+            />
+
+            <template>
+              <template v-for="(str, certIndex, key) in certificateObj[registryIndex]">
+                <div :key="key">
+                  <LabeledInput
+                    v-model="certificateObj[registryIndex][certIndex]"
+                    type="multiline"
+                    label="Certificate"
+                    class="p-10 col span-6"
+                    :mode="mode"
+                    required
+                    :placeholder="t('secret.certificate.certificatePlaceholder')"
+                  />
+
+                  <FileSelector
+                    v-model="certificateObj[registryIndex][certIndex]"
+                    class="btn btn-sm bg-primary mt-10"
+                    :label="t('generic.readFromFile')"
+                    @selected="handleSelectFile($event, registryIndex, certIndex)"
+                  />
+
+                  <div class="remove">
+                    <button
+                      type="button"
+                      :disabled="isView"
+                      class="btn role-link"
+                      @click="remove(certificateObj[registryIndex], certIndex)"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
               </template>
-            </ArrayListGrouped>
-          </template>
+
+              <button
+                type="button"
+                class="btn role-tertiary add"
+                :disabled="isView"
+                @click="addCertificate(registryIndex)"
+              >
+                Add PEM Certificate
+              </button>
+            </template>
+          </div>
 
           <button
             type="button"
             :disabled="isView"
-            class="btn role-link close btn-sm"
-            @click="remove(index)"
+            class="btn role-link remove btn-sm"
+            @click="remove(registryList, registryIndex)"
           >
             <i class="icon icon-2x icon-x" />
           </button>
@@ -140,7 +165,7 @@ export default {
         type="button"
         class="btn role-tertiary add"
         :disabled="isView"
-        @click="add()"
+        @click="addRegistry()"
       >
         Add Source Authority
       </button>
@@ -161,10 +186,6 @@ export default {
 
       top: 0;
       right: 0;
-    }
-
-    & > .info-box {
-      margin-bottom: 0;
     }
   }
 }

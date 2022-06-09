@@ -54,7 +54,7 @@ export default {
     <Tab name="verification" label="Verification" :weight="97">
       <Verification :value="chartValues.spec" :namespace="targetNamespace" :mode="mode" />
     </Tab>
-    <Tab name="registry" label="Container Registry" :weight="97">
+    <Tab name="registry" label="Container Registry" :weight="96">
       <Registry :value="chartValues.spec" :mode="mode" />
     </Tab>
   </div>
