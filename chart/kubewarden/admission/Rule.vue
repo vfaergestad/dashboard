@@ -9,6 +9,7 @@ export default {
   name: 'Rule',
 
   props: {
+    // Full list of available apiGroups
     apiGroups: {
       type:     Array,
       required: true
@@ -43,10 +44,11 @@ export default {
     ];
 
     return {
+      operationOptions,
+
       inStore:           null,
       noResourceOptions: false,
-      operationOptions,
-      schemas:            null
+      schemas:           null
     };
   },
 

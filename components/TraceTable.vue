@@ -1,5 +1,5 @@
 <script>
-import { TRACE_HEADERS, OPERATION_MAP } from '@/plugins/kubewarden/policy-class';
+import { MODE_MAP, TRACE_HEADERS, OPERATION_MAP } from '@/plugins/kubewarden/policy-class';
 import { KUBEWARDEN } from '@/config/types';
 import { isEmpty } from '@/utils/object';
 
@@ -21,6 +21,7 @@ export default {
 
   data() {
     return {
+      MODE_MAP,
       TRACE_HEADERS,
       OPERATION_MAP
     };
@@ -53,12 +54,16 @@ export default {
   },
 
   methods: {
-    color(op) {
+    modeColor(mode) {
+      return this.MODE_MAP[mode];
+    },
+
+    opColor(op) {
       return this.OPERATION_MAP[op];
     },
 
     capitalizeMessage(m) {
-      return m.charAt(0).toUpperCase() + m.slice(1);
+      return m?.charAt(0).toUpperCase() + m?.slice(1);
     }
   }
 };
@@ -90,37 +95,66 @@ export default {
         <td>
           <BadgeState
             :label="row.operation"
-            :color="color(row.operation)"
+            :color="opColor(row.operation)"
           />
         </td>
       </template>
+
+      <template #col:mode="{row}">
+        <td>
+          <BadgeState
+            :label="capitalizeMessage(row.mode)"
+            :color="modeColor(row.mode)"
+          />
+        </td>
+      </template>
+
       <template #sub-row="{row, fullColspan}">
         <td :colspan="fullColspan" class="sub-row">
           <div class="details">
-            <section class="col">
-              <div class="title">
-                Response Message
-              </div>
-              <span class="text-warning">
-                {{ capitalizeMessage(row.response_message) }}
-              </span>
-            </section>
-            <section class="col">
-              <div class="title">
-                Response Code
-              </div>
-              <span class="text-info">
-                {{ row.response_code ? row.response_code : 'N/A' }}
-              </span>
-            </section>
-            <section class="col">
-              <div class="title">
-                Mutated
-              </div>
-              <span class="text-info">
-                {{ row.mutated }}
-              </span>
-            </section>
+            <template v-if="row.logs">
+              <section class="col">
+                <div class="title">
+                  Response
+                </div>
+                <span v-if="row.logs.response" class="text-info">
+                  {{ capitalizeMessage(row.logs.response) }}
+                </span>
+                <span v-else>
+                  N/A
+                </span>
+              </section>
+            </template>
+
+            <template v-else>
+              <section class="col">
+                <div class="title">
+                  Response Message
+                </div>
+                <span v-if="row.response_message" class="text-warning">
+                  {{ capitalizeMessage(row.response_message) }}
+                </span>
+                <span v-else>
+                  N/A
+                </span>
+              </section>
+              <section class="col">
+                <div class="title">
+                  Response Code
+                </div>
+                <span class="text-info">
+                  {{ row.response_code ? row.response_code : 'N/A' }}
+                </span>
+              </section>
+              <section class="col">
+                <div class="title">
+                  Mutated
+                </div>
+                <span class="text-info">
+                  {{ row.mutated }}
+                </span>
+              </section>
+            </template>
           </div>
         </td>
       </template>
