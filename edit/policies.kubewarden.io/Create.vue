@@ -126,10 +126,6 @@ export default ({
     };
   },
 
-  provide() {
-    return { chartType: this.value.type };
-  },
-
   watch: {
     hasCustomRegistry(neu, old) {
       if ( !old ) {

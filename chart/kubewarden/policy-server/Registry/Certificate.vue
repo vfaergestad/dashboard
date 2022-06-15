@@ -1,8 +1,6 @@
 <script>
-import isEmpty from 'lodash/isEmpty';
 import { _CREATE, _EDIT, _VIEW } from '@/config/query-params';
 import { removeAt } from '@/utils/array';
-import { randomStr } from '~/utils/string';
 
 import FileSelector, { createOnSelected } from '@/components/form/FileSelector';
 import InfoBox from '@/components/InfoBox';

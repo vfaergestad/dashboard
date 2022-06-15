@@ -112,7 +112,9 @@ export const NAMESPACE_SELECTOR = {
 
 export default class KubewardenModel extends SteveModel {
   async allServices() {
-    return await this.$dispatch('cluster/findAll', { type: SERVICE }, { root: true });
+    const inStore = this.$rootGetters['currentProduct'].inStore;
+
+    return await this.$dispatch(`${ inStore }/findAll`, { type: SERVICE }, { root: true });
   }
 
   get detailPageHeaderBadgeOverride() {

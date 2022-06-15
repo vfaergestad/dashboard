@@ -65,8 +65,9 @@ export default class PolicyServer extends KubewardenModel {
 
   get allRelatedPolicies() {
     return async() => {
+      const inStore = this.$rootGetters['currentProduct'].inStore;
       const types = [KUBEWARDEN.ADMISSION_POLICY, KUBEWARDEN.CLUSTER_ADMISSION_POLICY];
-      const promises = types.map(type => this.$dispatch(`cluster/findAll`, { type, opt: { force: true } }, { root: true }));
+      const promises = types.map(type => this.$dispatch(`${ inStore }/findAll`, { type, opt: { force: true } }, { root: true }));
 
       try {
         const out = await Promise.all(promises);
@@ -114,7 +115,9 @@ export default class PolicyServer extends KubewardenModel {
 
   async openLogs() {
     try {
-      const pod = await this.$dispatch('cluster/findMatching', {
+      const inStore = this.$rootGetters['currentProduct'].inStore;
+
+      const pod = await this.$dispatch(`${ inStore }/findMatching`, {
         type:     POD,
         selector: `app=kubewarden-policy-server-${ this.metadata?.name }` // kubewarden-policy-server is hardcoded from the kubewarden-controller
       }, { root: true });
