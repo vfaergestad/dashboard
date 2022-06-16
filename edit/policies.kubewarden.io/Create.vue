@@ -49,6 +49,7 @@ export default ({
       type:    String,
       default: _CREATE
     },
+
     value: {
       type:     Object,
       required: true
@@ -60,16 +61,18 @@ export default ({
   async fetch() {
     this.errors = [];
 
-    try {
-      // Without importing this here the object would maintain the state
-      this.questions = await import(/* webpackChunkName: "questions-data" */ '@/.questions/questions.json');
+    if ( !this.chartValues ) {
+      try {
+        // Without importing this here the object would maintain the state
+        this.questions = await import(/* webpackChunkName: "questions-data" */ '@/.questions/questions.json');
 
-      const _questions = cloneDeep(JSON.parse(JSON.stringify(this.questions)));
+        const _questions = cloneDeep(JSON.parse(JSON.stringify(this.questions)));
 
-      // This object will need to be refactored when helm charts exist for policies
-      this.chartValues = { questions: _questions };
-    } catch (e) {
-      console.error(`Error importing questions ${ e }`); // eslint-disable-line no-console
+        // This object will need to be refactored when helm charts exist for policies
+        this.chartValues = { questions: _questions };
+      } catch (e) {
+        console.error(`Error importing questions ${ e }`); // eslint-disable-line no-console
+      }
     }
 
     const defaultPolicy = require(`@/.questions/policies/defaultPolicy.json`);
@@ -92,7 +95,9 @@ export default ({
       keywords:          [],
       questions:         null,
       searchQuery:       null,
+      splitType:         null,
       type:              null,
+      typeModule:        null,
       version:           null,
 
       chartValues:       null,
@@ -134,11 +139,6 @@ export default ({
 
       this.$set(this.stepPolicies, 'hidden', neu);
     }
-  },
-
-  created() {
-    this.chartValues = null;
-    this.yamlValues = null;
   },
 
   computed: {
@@ -230,14 +230,10 @@ export default ({
       }
 
       return out;
-    },
+    }
   },
 
   methods: {
-    cancel() {
-      this.done();
-    },
-
     done() {
       this.$router.replace({
         name:   'c-cluster-product-resource',
@@ -297,6 +293,23 @@ export default ({
       this.searchQuery = null;
     },
 
+    reset() {
+      this.$nextTick(() => {
+        const initialState = [
+          'errors',
+          'splitType',
+          'type',
+          'typeModule',
+          'chartValues.policy',
+          'yamlValues'
+        ];
+
+        initialState.map((i) => {
+          this[i] = null;
+        });
+      });
+    },
+
     resourceColor(type) {
       return this.RESOURCE_MAP[type.toLowerCase()];
     },
@@ -309,12 +322,14 @@ export default ({
           [REPO]:      'kubewarden',
           [REPO_TYPE]: 'cluster',
           [CHART]:     type.replace(`${ KUBEWARDEN.SPOOFED.POLICIES }.`, ''),
-        }
+        },
       });
 
       this.policyQuestions();
       this.stepPolicies.ready = true;
       this.$refs.wizard.next();
+      this.splitType = type.split('policies.kubewarden.io.policies.')[1];
+      this.typeModule = this.chartValues.policy.spec.module;
     }
   }
 
@@ -331,8 +346,11 @@ export default ({
       :errors="errors"
       :steps="steps"
       :edit-first-step="true"
+      :banner-title="splitType"
+      :banner-title-subtext="typeModule"
       class="wizard"
-      @cancel="cancel"
+      @back="reset"
+      @cancel="done"
       @finish="finish"
     >
       <template #registry>
