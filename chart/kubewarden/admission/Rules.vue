@@ -56,6 +56,10 @@ export default {
     removeRule(index) {
       removeAt(this.rules, index);
     },
+
+    ruleLabel(rule, index) {
+      return rule?.apiGroups?.[0] || index;
+    }
   }
 };
 </script>
@@ -73,7 +77,7 @@ export default {
           v-for="(rule, index) in rules"
           :key="'filtered-rule-' + index"
           :name="'rule-' + index"
-          :label="'Rule ' + index"
+          :label="`Rule - ${ ruleLabel(rule, index) }`"
           :show-header="false"
           class="container-group"
         >

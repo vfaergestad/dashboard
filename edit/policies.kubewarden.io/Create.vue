@@ -590,7 +590,6 @@ export default ({
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        margin-top: 20px;
         margin-bottom: 4px;
         line-height: initial;
       }
