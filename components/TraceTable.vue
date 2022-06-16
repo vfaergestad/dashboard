@@ -54,6 +54,10 @@ export default {
   },
 
   methods: {
+    capitalizeMessage(m) {
+      return m?.charAt(0).toUpperCase() + m?.slice(1);
+    },
+
     modeColor(mode) {
       return this.MODE_MAP[mode];
     },
@@ -62,8 +66,12 @@ export default {
       return this.OPERATION_MAP[op];
     },
 
-    capitalizeMessage(m) {
-      return m?.charAt(0).toUpperCase() + m?.slice(1);
+    showLogs(logs) {
+      if ( isEmpty(logs) ) {
+        return false;
+      }
+
+      return true;
     }
   }
 };
@@ -112,7 +120,7 @@ export default {
       <template #sub-row="{row, fullColspan}">
         <td :colspan="fullColspan" class="sub-row">
           <div class="details">
-            <template v-if="row.logs">
+            <template v-if="showLogs(row.logs)">
               <section class="col">
                 <div class="title">
                   Response

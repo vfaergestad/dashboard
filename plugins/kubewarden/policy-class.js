@@ -306,7 +306,7 @@ export default class KubewardenModel extends SteveModel {
 
     // If a policy is in monitor mode it will pass multiple trace objects
     if ( isArray(traces) ) {
-      traces.map(t => traceArray.push(t.data));
+      traces?.map(t => traceArray.push(t.data));
     } else {
       Object.assign(traceArray, traces.data);
     }
@@ -322,7 +322,7 @@ export default class KubewardenModel extends SteveModel {
         vSpan.startTime = date.toUTCString();
         vSpan.duration = duration.toFixed(2);
 
-        const vKeys = ['kind', 'mutated', 'name', 'namespace', 'operation', 'policy_id'];
+        const vKeys = ['kind', 'mutated', 'name', 'namespace', 'operation', 'policy_id', 'response_message', 'response_code'];
         const logs = {};
         let mode = 'protect'; // defaults to Protect mode for "Mode" trace header
 
@@ -332,14 +332,11 @@ export default class KubewardenModel extends SteveModel {
 
           const fields = eSpan.logs.flatMap(log => log.fields);
 
-          // need to add the data from these fields to the return down below
           fields.map((f) => {
             if ( f.key === 'response' ) {
               Object.assign(logs, { [f.key]: f.value });
             }
           });
-        } else {
-          vKeys.push(['response_message', 'response_code']);
         }
 
         const tags = vKeys.map(vKey => vSpan.tags.find(tag => tag.key === vKey));

@@ -88,12 +88,13 @@ export default class PolicyServer extends KubewardenModel {
         const policies = await this.allRelatedPolicies();
         const traceTypes = ['monitor', 'protect'];
 
-        const promises = policies?.map((p) => {
-          let traceTags; let proxyPath = null;
-
+        const promises = policies?.flatMap((p) => {
           const name = this.jaegerPolicyNameByPolicy(p);
+          const paths = [];
 
           traceTypes.map((t) => {
+            let traceTags; let proxyPath = null;
+
             switch (t) {
             case 'monitor':
               traceTags = `"policy_id"%3A"${ name }"`;
@@ -108,11 +109,11 @@ export default class PolicyServer extends KubewardenModel {
             default:
               break;
             }
+
+            paths.push(`${ jaeger.proxyUrl('http', 16686) + proxyPath }`);
           });
 
-          const JAEGER_PATH = `${ jaeger.proxyUrl('http', 16686) + proxyPath }`;
-
-          return this.$dispatch('request', { url: JAEGER_PATH });
+          return paths.map(p => this.$dispatch('request', { url: p }));
         });
 
         return await Promise.all(promises);
