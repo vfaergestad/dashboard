@@ -299,10 +299,6 @@ export default {
         managedBy,
       };
     },
-
-    hasthething() {
-      return this.value.resourceDetailHeaderOverride;
-    }
   },
 
   methods: {
