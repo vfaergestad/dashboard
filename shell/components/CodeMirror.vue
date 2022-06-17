@@ -120,7 +120,8 @@ export default {
 
     .vue-codemirror .CodeMirror {
       height: initial;
-      background: none
+      background: none;
+      min-height: 100px;
     }
   }
 </style>

@@ -29,6 +29,14 @@ export default {
       type:    String,
       default: _EDIT,
     },
+
+    /**
+     * Show at least one row by default
+     */
+    initialEmptyRow: {
+      type:    Boolean,
+      default: false
+    }
   },
 
   computed:   {
@@ -62,6 +70,7 @@ export default {
     v-bind="$attrs"
     :add-allowed="canAdd && !isView"
     :mode="mode"
+    :initial-empty-row="initialEmptyRow"
     @input="$emit('input', $event)"
     @add="$emit('add')"
     @remove="$emit('remove', $event)"
