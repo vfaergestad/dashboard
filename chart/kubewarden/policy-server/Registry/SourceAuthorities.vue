@@ -1,7 +1,6 @@
 <script>
 import { _CREATE, _EDIT, _VIEW } from '@/config/query-params';
 import { removeAt } from '@/utils/array';
-import { isEmpty } from '@/utils/object';
 
 import FileSelector, { createOnSelected } from '@/components/form/FileSelector';
 import LabeledInput from '@/components/form/LabeledInput';
@@ -66,69 +65,61 @@ export default {
   },
 
   methods: {
-    addCertificate(index) {
-      const parsed = parseInt(index);
+    addCertificate(rIndex) {
+      const key = Object.keys(this.value)[rIndex];
 
-      if ( this.certificateObj[parsed] ) {
-        return this.certificateObj[parsed].push('');
-      }
-
-      this.$set(this.certificateObj, [parsed], ['']);
+      this.$set(this.value, [key], [...this.value[key], '']);
     },
-
-    /*
-
-      Having issues with the keys of the registryObj, they are not being generated
-      properly which causes multiples of the same key
-
-    */
 
     addRegistry() {
-      if ( !isEmpty(this.registryObj) ) {
-        // Create a new object with an index as the key
-        const keys = Object.keys(this.registryObj).map(k => parseInt(k));
-        const sum = keys.reduce((a, b) => a + b, 1);
+      let length = null;
 
-        // This doesn't solve everything
-        // if ( this.registryObj[sum.toString()] ) {
-        //   sum = sum++;
-        // }
+      if ( this.value ) {
+        length = Object.keys(this.value).length;
+      }
+      const key = length ? length += 1 : 1;
 
-        return this.$set(this.registryObj, [sum], '');
+      this.$set(this.registryObj, [key], '');
+
+      if ( !this.value ) {
+        this.$set(this, 'value', { [key]: [] });
       }
 
-      this.$set(this.registryObj, '0', '');
+      this.$set(this.value, [key], []);
     },
 
-    handleSelectFile(cert, registryIndex) {
+    handleSelectFile(cert, rIndex) {
       createOnSelected('crt');
 
-      const data = this.certificateObj[registryIndex];
+      const key = Object.keys(this.value)[rIndex];
 
-      if ( data ) {
-        data.push(cert);
-      } else {
-        this.$set(this.certificateObj, [registryIndex], [cert]);
+      if ( key ) {
+        this.$set(this.value, [key], [...this.value[key], cert]);
       }
     },
 
-    removeRegistry(source, index) {
-      const parsed = parseInt(index);
+    removeRegistry(rIndex) {
+      const key = Object.keys(this.value)[rIndex];
 
-      if ( this.value?.[source[parsed]] ) {
-        this.$delete(this.value, [source[parsed]]);
+      if ( key ) {
+        this.$delete(this.value, [key]);
       }
 
-      if ( this.certificateObj[parsed] ) {
-        delete this.certificateObj[parsed];
-      }
-
-      delete source[parsed];
+      delete this.registryObj[rIndex];
       this.$forceUpdate();
     },
 
-    removeCert(source, index) {
-      removeAt(source, index);
+    removeCert(rIndex, cIndex) {
+      const key = Object.keys(this.value)[rIndex];
+
+      removeAt(this.value[key], cIndex);
+    },
+
+    updateRegistryKey(event, rIndex) {
+      const key = Object.keys(this.value)[rIndex];
+
+      this.value[event] = this.value[key];
+      delete this.value[key];
     }
   },
 };
@@ -138,24 +129,25 @@ export default {
   <div class="row">
     <div class="col span-12">
       <h3>Source Authorities</h3>
-      <template v-for="(rKey, rValue) in Object.entries(registryObj)">
-        <div :key="rKey + rValue" class="mt-20 mb-20 sources__container">
+      <template v-for="(rKey, rIndex) in Object.entries(registryObj)">
+        <div :key="rKey[0] + rIndex" class="mt-20 mb-20 sources__container">
           <div>
             <LabeledInput
-              v-model="registryObj[rKey]"
+              v-model="registryObj[parseInt(rKey[0])]"
               type="multiline"
               label="Registry URI endpoint"
               class="mb-20 mt-20"
               :mode="mode"
               placeholder="registry-pre.example.com:5500"
-              :disabled="!isCreate"
+              required
+              @input="updateRegistryKey($event, rIndex, rKey)"
             />
 
             <template>
-              <template v-for="(str, cIndex, cKey) in certificateObj[(parseInt(rKey))]">
-                <div :key="cKey" class="sources__container__cert">
+              <template v-for="(str, cIndex) in value[ Object.keys(value)[rIndex] ]">
+                <div :key="str + cIndex" class="sources__container__cert">
                   <LabeledInput
-                    v-model="certificateObj[(parseInt(rKey))][cIndex]"
+                    v-model="value[ Object.keys(value)[rIndex] ][cIndex]"
                     type="multiline"
                     label="Certificate"
                     class="p-10 col span-6"
@@ -169,7 +161,7 @@ export default {
                       type="button"
                       :disabled="isView"
                       class="btn role-link remove"
-                      @click="removeCert(certificateObj[(parseInt(rKey))], cIndex)"
+                      @click="removeCert(rIndex, cIndex)"
                     >
                       Remove Certificate
                     </button>
@@ -181,16 +173,15 @@ export default {
                 type="button"
                 class="btn role-tertiary add"
                 :disabled="isView"
-                @click="addCertificate(rKey)"
+                @click="addCertificate(rIndex)"
               >
                 Add PEM Certificate
               </button>
 
               <FileSelector
-                v-model="certificateObj[(parseInt(rKey))]"
                 class="btn role-link"
                 label="Read Certificate from File"
-                @selected="handleSelectFile($event, rKey)"
+                @selected="handleSelectFile($event, rIndex)"
               />
             </template>
           </div>
@@ -199,7 +190,7 @@ export default {
             type="button"
             :disabled="isView"
             class="btn role-link remove btn-sm"
-            @click="removeRegistry(registryObj, rKey)"
+            @click="removeRegistry(rKey[0])"
           >
             <i class="icon icon-2x icon-x" />
           </button>

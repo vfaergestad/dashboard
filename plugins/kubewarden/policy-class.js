@@ -76,8 +76,8 @@ export const CATEGORY_MAP = [
 ];
 
 export const MODE_MAP = {
-  monitor: 'bg-info',
-  protect: 'bg-error'
+  monitor: 'bg-success',
+  protect: 'bg-warning'
 };
 
 export const OPERATION_MAP = {

@@ -4,7 +4,7 @@ import { _CREATE } from '@/config/query-params';
 import ArrayList from '@/components/form/ArrayList';
 import Banner from '@/components/Banner';
 
-import Certificate from './Certificate';
+import SourceAuthorities from './SourceAuthorities';
 
 export default {
   name: 'Registry',
@@ -25,7 +25,7 @@ export default {
   components: {
     ArrayList,
     Banner,
-    Certificate
+    SourceAuthorities
   },
 
   data() {
@@ -68,7 +68,7 @@ export default {
     <template>
       <div class="row mb-20">
         <div class="col span-12">
-          <Certificate v-model="value.sourceAuthorities" :mode="mode" />
+          <SourceAuthorities v-model="value.sourceAuthorities" :mode="mode" />
         </div>
       </div>
     </template>
