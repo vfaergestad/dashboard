@@ -86,7 +86,7 @@ export default {
     <div class="col span-12">
       <h3>Source Authorities</h3>
       <template v-for="(row, index) in rows">
-        <Authority :key="index" v-model="rows[index]" :mode="mode" @update="updateAuthority($event, index)">
+        <Authority ref="authority" :key="index" v-model="rows[index]" :mode="mode" @update="updateAuthority($event, index)">
           <template #remove>
             <button
               type="button"

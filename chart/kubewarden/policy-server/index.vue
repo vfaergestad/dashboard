@@ -1,4 +1,5 @@
 <script>
+import isArray from 'lodash/isArray';
 import { _CREATE } from '@/config/query-params';
 
 import Tab from '@/components/Tabbed/Tab';
@@ -39,6 +40,21 @@ export default {
 
       return 'default';
     },
+  },
+
+  methods: {
+    refresh() {
+      try {
+        const keys = this.$refs.registry.$refs.sourceAuthorities.$refs.authority;
+
+        for ( const k of keys ) {
+          k?.$forceUpdate();
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn(`Error refreshing authority refs: ${ e }`);
+      }
+    }
   }
 };
 </script>
@@ -54,8 +70,8 @@ export default {
     <Tab name="verification" label="Verification" :weight="97">
       <Verification :value="chartValues.spec" :namespace="targetNamespace" :mode="mode" />
     </Tab>
-    <Tab name="registry" label="Container Registry" :weight="96">
-      <Registry :value="chartValues.spec" :mode="mode" />
+    <Tab name="registry" label="Container Registry" :weight="96" @active="refresh">
+      <Registry ref="registry" :value="chartValues.spec" :mode="mode" />
     </Tab>
   </div>
 </template>

@@ -83,7 +83,7 @@ export default {
     <template>
       <div class="row mb-20">
         <div class="col span-12">
-          <SourceAuthorities v-model="sourceAuthorities" :mode="mode" @update="update" />
+          <SourceAuthorities ref="sourceAuthorities" v-model="sourceAuthorities" :mode="mode" @update="update" />
         </div>
       </div>
     </template>

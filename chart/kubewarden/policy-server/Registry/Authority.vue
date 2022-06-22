@@ -63,6 +63,7 @@ export default {
   <div class="mt-20 mb-20 sources__container">
     <div>
       <LabeledInput
+        ref="authorityName"
         v-model="value.registryName"
         type="multiline"
         label="Registry URI endpoint"
@@ -77,6 +78,7 @@ export default {
         <template v-for="(cert, cIndex) in value.certs">
           <div :key="cIndex" class="sources__container__cert">
             <LabeledInput
+              ref="authorityCert"
               v-model="value.certs[cIndex]"
               type="multiline"
               label="Certificate"
