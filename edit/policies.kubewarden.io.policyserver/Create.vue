@@ -59,16 +59,6 @@ export default {
 
     async finish(event) {
       try {
-        // const { sourceAuthorities } = this.chartValues?.questions?.spec;
-
-        // if ( sourceAuthorities ) {
-        //   const out = sourceAuthorities.map((s) => {
-        //     return { [s.uri]: s.data };
-        //   });
-
-        //   this.$set(this.chartValues.questions.spec, 'sourceAuthorities', out);
-        // }
-
         merge(this.value, this.chartValues?.questions);
 
         await this.save(event);

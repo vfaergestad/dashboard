@@ -28,10 +28,25 @@ export default {
     SourceAuthorities
   },
 
+  fetch() {
+    this.insecureSources = this.value?.insecureSources || [];
+    this.sourceAuthorities = this.value?.sourceAuthorities || {};
+  },
+
   data() {
     const descriptionLabel = 'The PolicyServer allows you to pull policies from OCI registries and HTTP servers, by default HTTPS is enforced with host TLS verification. You can interact with registries using untrusted certificates or even without TLS by using the `insecureSources` setting. This approach is highly discouraged in environments closer to production.';
 
-    return { descriptionLabel };
+    return {
+      descriptionLabel,
+      insecureSources:   null,
+      sourceAuthorities: null
+    };
+  },
+
+  methods: {
+    update() {
+      this.$set(this.value, 'sourceAuthorities', this.sourceAuthorities);
+    }
   }
 };
 </script>
@@ -53,7 +68,7 @@ export default {
       <div class="row">
         <div class="col span-6">
           <ArrayList
-            v-model="value.insecureSources"
+            v-model="insecureSources"
             :mode="mode"
             :add-allowed="true"
             add-label="Add Insecure Source"
@@ -68,7 +83,7 @@ export default {
     <template>
       <div class="row mb-20">
         <div class="col span-12">
-          <SourceAuthorities v-model="value.sourceAuthorities" :mode="mode" />
+          <SourceAuthorities v-model="sourceAuthorities" :mode="mode" @update="update" />
         </div>
       </div>
     </template>
