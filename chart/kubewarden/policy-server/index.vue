@@ -1,5 +1,4 @@
 <script>
-import isArray from 'lodash/isArray';
 import { _CREATE } from '@/config/query-params';
 
 import Tab from '@/components/Tabbed/Tab';
@@ -45,6 +44,10 @@ export default {
   methods: {
     refresh() {
       try {
+        /*
+          A forceUpdate is needed for certain inputs within the Tab component
+          that calculate the height to show loaded data
+        */
         const keys = this.$refs.registry.$refs.sourceAuthorities.$refs.authority;
 
         for ( const k of keys ) {

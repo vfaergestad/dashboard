@@ -94,7 +94,7 @@ export default {
           return this.schemaForGroup(g);
         });
 
-        return schemas?.flatMap(schema => schema.map(s => s.attributes.resource));
+        return schemas?.flatMap(schema => schema?.map(s => s?.attributes?.resource));
       }
 
       return null;
@@ -103,11 +103,15 @@ export default {
 
   methods: {
     schemaForGroup(group) {
-      const name = this.$store.getters[`${ this.inStore }/schemaName`]({ type: group });
+      if ( !!group ) {
+        const name = this.$store.getters[`${ this.inStore }/schemaName`]({ type: group });
 
-      return this.schemas.filter((s) => {
-        return s._group === name;
-      });
+        return this.schemas?.filter((s) => {
+          return s._group === name;
+        });
+      }
+
+      return null;
     }
   }
 };
