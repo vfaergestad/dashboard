@@ -34,10 +34,7 @@ export default {
   },
 
   data() {
-    const descriptionLabel = 'The PolicyServer allows you to pull policies from OCI registries and HTTP servers, by default HTTPS is enforced with host TLS verification. You can interact with registries using untrusted certificates or even without TLS by using the `insecureSources` setting. This approach is highly discouraged in environments closer to production.';
-
     return {
-      descriptionLabel,
       insecureSources:   null,
       sourceAuthorities: null
     };
@@ -57,13 +54,13 @@ export default {
       <Banner
         class="type-banner mb-20 mt-0"
         color="info"
-        :label="descriptionLabel"
+        :label="t('kubewarden.policyServerConfig.registry.description')"
       />
     </div>
 
     <template>
       <h3 class="mb-20">
-        Insecure Sources
+        {{ t('kubewarden.policyServerConfig.registry.title') }}
       </h3>
       <div class="row">
         <div class="col span-6">
@@ -71,8 +68,8 @@ export default {
             v-model="insecureSources"
             :mode="mode"
             :add-allowed="true"
-            add-label="Add Insecure Source"
-            value-placeholder="registry-dev.example.com:5500"
+            :add-label="t('kubewarden.policyServerConfig.registry.addLabel')"
+            :value-placeholder="t('kubewarden.policyServerConfig.registry.placeholder')"
           />
         </div>
       </div>

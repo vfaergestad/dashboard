@@ -31,7 +31,11 @@ export default {
   computed: {
     headers() {
       return this.$store.getters['type-map/headersFor'](this.schema);
-    }
+    },
+
+    hasNamespaceSelector(row) {
+      return row.namespaceSelector;
+    },
   }
 };
 </script>
@@ -42,13 +46,18 @@ export default {
     <Banner
       class="type-banner mb-20 mt-0"
       color="info"
-      label="AdmissionPolicy is a namespace-wide resource. These policies will process only the requests that are targeting the Namespace where the AdmissionPolicy is defined."
+      :label="t('kubewarden.admissionPolicy.description')"
     />
     <ResourceTable :schema="schema" :rows="rows" :headers="headers">
       <template #col:mode="{ row }">
         <td>
           <span class="policy__mode">
             <span class="text-capitalize">{{ row.spec.mode }}</span>
+            <i
+              v-if="!hasNamespaceSelector(row)"
+              :[v-tooltip.bottom]="t('kubewarden.admissionPolicy.namespaceWarning')"
+              class="icon icon-warning"
+            />
           </span>
         </td>
       </template>

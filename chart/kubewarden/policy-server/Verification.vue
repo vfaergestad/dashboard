@@ -27,8 +27,8 @@ export default {
         <LabeledInput
           v-model="value.verificationConfig"
           :mode="mode"
-          label="Verification Config"
-          tooltip="Name of VerificationConfig configmap in the same namespace, containing Sigstore verification configuration. The configuration must be under a key named verification-config in the Configmap."
+          :label="t('kubewarden.policyServerConfig.verification.label')"
+          :tooltip="t('kubewarden.policyServerConfig.verification.tooltip')"
         />
       </div>
     </div>

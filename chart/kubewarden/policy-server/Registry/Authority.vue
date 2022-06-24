@@ -66,11 +66,11 @@ export default {
         ref="authorityName"
         v-model="value.registryName"
         type="multiline"
-        label="Registry URI endpoint"
+        :label="t('kubewarden.policyServerConfig.sourceAuthorities.endpoint')"
         class="mb-20 mt-20"
         :mode="mode"
         :disabled="isView"
-        placeholder="registry-pre.example.com:5500"
+        :placeholder="t('kubewarden.policyServerConfig.sourceAuthorities.placeholder')"
         required
       />
 
@@ -81,7 +81,7 @@ export default {
               ref="authorityCert"
               v-model="value.certs[cIndex]"
               type="multiline"
-              label="Certificate"
+              :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.label')"
               class="p-10 col span-6"
               :mode="mode"
               :disabled="isView"
@@ -96,7 +96,7 @@ export default {
                 class="btn role-link remove"
                 @click="removeCert(cIndex)"
               >
-                Remove Certificate
+                {{ t('kubewarden.policyServerConfig.sourceAuthorities.certificate.remove') }}
               </button>
             </div>
           </div>
@@ -108,12 +108,12 @@ export default {
           :disabled="isView"
           @click="addCertificate()"
         >
-          Add PEM Certificate
+          {{ t('kubewarden.policyServerConfig.sourceAuthorities.certificate.add') }}
         </button>
 
         <FileSelector
           class="btn role-link"
-          label="Read Certificate from File"
+          :label="t('kubewarden.policyServerConfig.sourceAuthorities.certificate.file')"
           :disabled="isView"
           @selected="handleSelectFile($event)"
         />

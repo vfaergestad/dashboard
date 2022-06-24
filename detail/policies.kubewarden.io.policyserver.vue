@@ -68,10 +68,6 @@ export default {
     ...mapGetters(['currentCluster']),
     ...monitoringStatus(),
 
-    namespaceWarning() {
-      return 'This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.';
-    },
-
     tracesRows() {
       return this.value.traceTableRows(this.traces);
     }
@@ -83,7 +79,6 @@ export default {
         return row.namespaceSelector;
       }
 
-      // No need to check if it's an AdmissionPolicy... unless they decide to target something they shouldn't
       return true;
     },
   }
@@ -121,7 +116,7 @@ export default {
                   <span class="text-capitalize">{{ row.spec.mode }}</span>
                   <i
                     v-if="!hasNamespaceSelector(row)"
-                    v-tooltip.bottom="namespaceWarning"
+                    :[v-tooltip.bottom]="t('kubewarden.admissionPolicy.namespaceWarning')"
                     class="icon icon-warning"
                   />
                 </span>

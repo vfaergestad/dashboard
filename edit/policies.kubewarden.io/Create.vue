@@ -276,45 +276,21 @@ export default ({
       @cancel="done"
       @finish="finish"
     >
-      <!-- <template #registry>
-        <div class="row mt-10">
-          <div class="col span-12">
-            <Banner
-              class="type-banner mb-20 mt-0"
-              color="info"
-              label="The PolicyServer allows you to pull policies from OCI registries and HTTP servers, by default HTTPS is enforced with host TLS verification."
-            />
-
-            <RadioGroup
-              v-model="hasCustomRegistry"
-              name="hasCustomRegistry"
-              :options="[false, true]"
-              :mode="mode"
-              class="mb-20"
-              label="Custom Registry"
-              :labels="['No', 'Yes']"
-              tooltip="If 'No' is selected you will be given a currated list of policies to choose from."
-            />
-          </div>
-        </div>
-      </template> -->
-
-      <!-- For selecting policies from the Policy Hub -->
       <template #policies>
         <PolicyGrid :value="subtypes" @selectType="selectType($event)">
           <template #customSubtype>
             <div class="subtype" @click="selectType('custom')">
               <div class="subtype__metadata">
                 <div class="subtype__badge" :style="{ 'background-color': 'var(--darker)' }">
-                  <label>Custom</label>
+                  <label>{{ t('kubewarden.customPolicy.badge') }}</label>
                 </div>
 
                 <h4 class="subtype__label">
-                  Custom Policy
+                  {{ t('kubewarden.customPolicy.title') }}
                 </h4>
 
                 <div class="subtype__description">
-                  A generic template for using your own policy.
+                  {{ t('kubewarden.customPolicy.description') }}
                 </div>
               </div>
             </div>

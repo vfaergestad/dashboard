@@ -89,10 +89,6 @@ export default {
       }
 
       return this.filteredRows;
-    },
-
-    namespaceWarning() {
-      return 'This policy is targeting Rancher specific namespaces which will cause catastrophic failures with your Rancher deployment.';
     }
   },
 
@@ -146,7 +142,7 @@ export default {
     <Banner
       class="type-banner mb-20 mt-0"
       color="info"
-      label="ClusterAdmissionPolicy is a cluster-wide resource. These policies will process all requests within the cluster where the ClusterAdmissionPolicy is defined."
+      :label="t('kubewarden.clusterAdmissionPolicy.description')"
     />
 
     <div class="row mb-20">
@@ -196,7 +192,7 @@ export default {
             <span class="text-capitalize">{{ row.spec.mode }}</span>
             <i
               v-if="!hasNamespaceSelector(row)"
-              v-tooltip.bottom="namespaceWarning"
+              :[v-tooltip.bottom]="t('kubewarden.admissionPolicy.namespaceWarning')"
               class="icon icon-warning"
             />
           </span>

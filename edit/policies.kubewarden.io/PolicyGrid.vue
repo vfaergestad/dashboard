@@ -142,7 +142,7 @@ export default {
         type="button"
         @click="refresh"
       >
-        Reset Filter
+        {{ t('kubewarden.utils.resetFilter') }}
       </button>
     </div>
 

@@ -121,10 +121,10 @@ export default {
   <div v-if="value" class="mt-40">
     <div class="row mb-20">
       <div class="col span-12">
-        <h4>API Groups</h4>
+        <h4>{{ t('kubewarden.policyConfig.apiGroups.title') }}</h4>
         <LabeledSelect
           v-model="value.apiGroups"
-          label="API Group"
+          :label="t('kubewarden.policyConfig.apiGroups.label')"
           :mode="mode"
           :multiple="true"
           :options="apiGroupOptions"
@@ -134,8 +134,7 @@ export default {
 
     <div class="row mb-20">
       <div class="col span-12">
-        <h4>API Versions</h4>
-
+        <h4>{{ t('kubewarden.policyConfig.apiVersions.title') }}</h4>
         <LabeledSelect
           v-model="value.apiVersions"
           :clearable="true"
@@ -144,7 +143,7 @@ export default {
           :multiple="true"
           :options="apiVersionOptions || []"
           placement="bottom"
-          label="Add API Version"
+          :label="t('kubewarden.policyConfig.apiVersions.label')"
         >
           <template #options="opt">
             <span>{{ opt }}</span>
@@ -155,28 +154,28 @@ export default {
 
     <div class="row mb-20">
       <div class="col span-12">
-        <h4>Operations</h4>
+        <h4>{{ t('kubewarden.policyConfig.operations.title') }}</h4>
         <LabeledSelect
           v-model="value.operations"
-          label="Operation type"
+          :label="t('kubewarden.policyConfig.operations.label')"
           :mode="mode"
           :multiple="true"
           :options="operationOptions || []"
-          tooltip="The type of operation to be validated."
+          :tooltip="t('kubewarden.policyConfig.operations.tooltip')"
         />
       </div>
     </div>
 
     <div class="row mb-20">
       <div class="col span-12">
-        <h4>Resources</h4>
+        <h4>{{ t('kubewarden.policyConfig.mode.title') }}</h4>
         <LabeledSelect
           v-model="value.resources"
-          label="Resource type"
+          :label="t('kubewarden.policyConfig.mode.label')"
           :mode="mode"
           :multiple="true"
           :options="resourceOptions || []"
-          tooltip="The targeted resources for the policy. Needs to be a resource that is supported by the policy, this is determined in the `metadata.yml` of the selected policy."
+          :tooltip="t('kubewarden.policyConfig.mode.tooltip')"
         />
       </div>
     </div>
