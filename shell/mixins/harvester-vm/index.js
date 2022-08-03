@@ -1250,13 +1250,7 @@ export default {
           }
         });
       }
-    },
-
-    updateReserved(value = {}) {
-      const { memory } = value;
-
-      this.$set(this, 'reservedMemory', memory);
-    },
+    }
   },
 
   watch: {
@@ -1269,7 +1263,7 @@ export default {
 
           const oldImageId = old[0]?.image;
 
-          if (this.isCreate && oldImageId === imageId && imageId) {
+          if (this.isCreate && oldImageId === imageId) {
             this.osType = osType;
           }
         }

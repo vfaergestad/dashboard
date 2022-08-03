@@ -10,13 +10,13 @@ import CruResource from '@shell/components/CruResource';
 import { RadioGroup } from '@components/Form/Radio';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
+import UnitInput from '@shell/components/form/UnitInput';
 import NameNsDescription from '@shell/components/form/NameNsDescription';
 
 import SSHKey from '@shell/edit/kubevirt.io.virtualmachine/VirtualMachineSSHKey';
 import Volume from '@shell/edit/kubevirt.io.virtualmachine/VirtualMachineVolume';
 import Network from '@shell/edit/kubevirt.io.virtualmachine/VirtualMachineNetwork';
 import CpuMemory from '@shell/edit/kubevirt.io.virtualmachine/VirtualMachineCpuMemory';
-import Reserved from '@shell/edit/kubevirt.io.virtualmachine/VirtualMachineReserved';
 import CloudConfig from '@shell/edit/kubevirt.io.virtualmachine/VirtualMachineCloudConfig';
 import NodeScheduling from '@shell/components/form/NodeScheduling';
 import AccessCredentials from '@shell/edit/kubevirt.io.virtualmachine/VirtualMachineAccessCredentials';
@@ -45,6 +45,7 @@ export default {
     CruResource,
     LabeledInput,
     LabeledSelect,
+    UnitInput,
     NameNsDescription,
     Volume,
     SSHKey,
@@ -53,7 +54,6 @@ export default {
     CloudConfig,
     NodeScheduling,
     AccessCredentials,
-    Reserved,
   },
 
   mixins: [CreateEditView, VM_MIXIN],
@@ -278,11 +278,12 @@ export default {
       }
 
       const cloneValue = clone(this.value);
-      const cloneSpec = clone(this.spec);
+
+      cloneValue.spec.template.spec.nodeSelector = this.spec.template.spec.nodeSelector;
 
       for (let i = 1; i <= this.count; i++) {
         this.$set(this.value, 'spec', cloneValue.spec);
-        this.$set(this, 'spec', cloneSpec);
+        this.$set(this, 'spec', cloneValue.spec);
         const suffix = i < 10 ? `0${ i }` : i;
 
         this.value.cleanForNew();
@@ -544,11 +545,17 @@ export default {
               </div>
             </div>
 
-            <Reserved
-              :reserved-memory="reservedMemory"
-              :mode="mode"
-              @updateReserved="updateReserved"
-            />
+            <div class="col span-6">
+              <UnitInput
+                v-model="reservedMemory"
+                v-int-number
+                :label="t('harvester.virtualMachine.input.reservedMemory')"
+                :mode="mode"
+                :input-exponent="2"
+                :increment="1024"
+                :output-modifier="true"
+              />
+            </div>
           </div>
 
           <CloudConfig
