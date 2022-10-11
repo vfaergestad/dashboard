@@ -13,7 +13,7 @@ import Select from '@shell/components/form/Select';
 import day from 'dayjs';
 
 import { escapeHtml, escapeRegex } from '@shell/utils/string';
-import { HARVESTER_NAME as VIRTUAL } from '@shell/config/product/harvester-manager';
+import { HARVESTER_NAME as VIRTUAL } from '@shell/config/features';
 
 import Socket, {
   EVENT_CONNECTED,
@@ -58,12 +58,6 @@ export default {
     },
 
     url: {
-      type:    String,
-      default: null,
-    },
-
-    // The container in the pod to initially show
-    initialContainer: {
       type:    String,
       default: null,
     }
