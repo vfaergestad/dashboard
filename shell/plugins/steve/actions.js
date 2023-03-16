@@ -1,6 +1,6 @@
 import https from 'https';
 import { addParam, parse as parseUrl, stringify as unParseUrl } from '@shell/utils/url';
-import { handleSpoofedRequest, loadSchemas } from '@shell/plugins/dashboard-store/actions';
+import { handleSpoofedRequest, loadSchemas, _ALL } from '@shell/plugins/dashboard-store/actions';
 import { set } from '@shell/utils/object';
 import { deferred } from '@shell/utils/promise';
 import { streamJson, streamingSupported } from '@shell/utils/stream';
@@ -8,16 +8,58 @@ import isObject from 'lodash/isObject';
 import { classify } from '@shell/plugins/dashboard-store/classify';
 import { NAMESPACE } from '@shell/config/types';
 import jsyaml from 'js-yaml';
+import { waitFor } from '@shell/utils/async';
+
+const unsupportedAdvancedWorkerOptions = ['stream', 'depaginate', 'incremental', 'hasManualRefresh', 'redirectUnauthorized'];
+const validateAdvancedWorkerOpts = (type, opt, { cacheLoadStrategy = _ALL, supportsStream }) => {
+  const method = opt.method?.toLowerCase() || 'get'; // TODO: RC https://github.com/rancher/dashboard/issues/8420
+
+  if ((opt?.url && !type) || opt.load === false || method !== 'get') {
+    // These are expected, and we just shouldn't use the advanced worker
+    return false;
+  }
+
+  // cacheLoadStrategy is a more complex version of opt.load and details how the result should be added to the store
+  if (cacheLoadStrategy !== _ALL) {
+    throw new Error(`Advanced worker is only compatible with the "ALL" load strategy`);
+  }
+
+  const invalidOptions = Object.entries(opt)
+    .filter(([name, value]) => {
+      if (name === 'stream' && !supportsStream) {
+        return false;
+      }
+
+      return !!value && unsupportedAdvancedWorkerOptions.includes(name);
+    })
+    .map(([name]) => name);
+
+  if (invalidOptions.length) {
+    // These are unexpected, and we should address where they came from
+    throw new Error(`Advanced worker is enabled but invalid options were provided: ${ invalidOptions.join(', ') }`);
+  }
+
+  return true;
+};
 
 export default {
 
-  // Need to override this, so that thhe 'this' context is correct (this class not the base class)
+  // Need to override this, so that the 'this' context is correct (this class not the base class)
   async loadSchemas(ctx, watch = true) {
     return await loadSchemas(ctx, watch);
   },
 
-  async request({ state, dispatch, rootGetters }, pOpt ) {
+  async request(ctx, pOpt) {
+    const {
+      state, dispatch, rootGetters, getters
+    } = ctx;
+
     const opt = pOpt.opt || pOpt;
+    const supportsStream = state.allowStreaming && state.config.supportsStream && streamingSupported();
+    const isAdvancedWorker = getters.advancedWorkerCompatible && validateAdvancedWorkerOpts(pOpt.type, opt, {
+      cacheLoadStrategy: pOpt.load,
+      supportsStream
+    });
 
     const spoofedRes = await handleSpoofedRequest(rootGetters, 'cluster', opt);
 
@@ -51,7 +93,7 @@ export default {
     const key = JSON.stringify(headers) + method + opt.url;
     let waiting;
 
-    if ( (method === 'get') ) {
+    if ( (method === 'get' && !isAdvancedWorker) ) {
       waiting = state.deferredRequests[key];
 
       if ( waiting ) {
@@ -69,7 +111,7 @@ export default {
       }
     }
 
-    if ( opt.stream && state.allowStreaming && state.config.supportsStream && streamingSupported() ) {
+    if ( opt.stream && supportsStream) {
       // console.log('Using Streaming for', opt.url);
 
       return streamJson(opt.url, opt, opt.onData).then(() => {
@@ -84,8 +126,38 @@ export default {
     let paginatedResult;
 
     while (true) {
+      let out;
+
       try {
-        const out = await makeRequest(this, opt);
+        if (isAdvancedWorker) {
+          if (!this.$workers[getters.storeName]) {
+            throw new Error('Advanced worker has not been created');
+          }
+
+          await waitFor(() => !!this.$workers[getters.storeName], 'Worker creation');
+        }
+
+        if (isAdvancedWorker && this.$workers[getters.storeName]) {
+          const {
+            type, namespace, id, opt: {
+              limit, filter, sortBy, sortOrder, force
+            } = {}
+          } = pOpt;
+
+          out = await makeWorkerRequest(this, {
+            type,
+            namespace,
+            id,
+            filter,
+            limit,
+            sortBy,
+            sortOrder,
+            getters,
+            force
+          });
+        } else {
+          out = await makeRequest(this, opt);
+        }
 
         if (!opt.depaginate) {
           return out;
@@ -132,6 +204,34 @@ export default {
       });
     }
 
+    function makeWorkerRequest(that, {
+      type, namespace, id, limit, filter, sortBy, sortOrder, getters, force
+    }) {
+      const worker = that.$workers[getters.storeName];
+
+      if (id) {
+        const schema = getters['schemaFor'](type);
+
+        // ToDo: we'll need to figure out how to do this for all other stores if the advanced worker ever makes it beyond 'cluster'
+        if (schema.attributes?.namespaced) {
+          [namespace, id] = id.split('/');
+          if (!namespace || !id) {
+            throw new Error(`Unable to determine the namespace and/or id of a namespaced resource. Type: '${ type }'. Namespace: '${ namespace }'. Id: '${ id }'`);
+          }
+        }
+      }
+
+      return worker.postMessageAndWait({
+        type, namespace, id, limit, filter, sortBy, sortOrder, force
+      }).then((res) => {
+        const out = responseObject(res);
+
+        finishDeferred(key, 'resolve', out);
+
+        return out;
+      });
+    }
+
     function finishDeferred(key, action = 'resolve', res) {
       const waiting = state.deferredRequests[key] || [];
 
@@ -147,7 +247,7 @@ export default {
     function responseObject(res) {
       let out = res.data;
 
-      const fromHeader = res.headers['x-api-cattle-auth'];
+      const fromHeader = res.headers?.['x-api-cattle-auth'];
 
       if ( fromHeader && fromHeader !== rootGetters['auth/fromHeader'] ) {
         dispatch('auth/gotHeader', fromHeader, { root: true });

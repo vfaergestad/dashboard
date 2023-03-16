@@ -40,6 +40,7 @@ export async function loadSchemas(ctx, watch = true) {
   const {
     getters, dispatch, commit, rootGetters
   } = ctx;
+
   const res = await dispatch('findAll', { type: SCHEMA, opt: { url: 'schemas', load: false } });
   const spoofedTypes = rootGetters['type-map/allSpoofedSchemas'] ;
 
@@ -137,12 +138,20 @@ export default {
     }
   },
 
+  // opt:
+  //  filter: Filter by fields, e.g. {field: value, anotherField: anotherValue} (default: none)
+  //  limit: Number of records to return per page
+  //  sortBy: Sort by field
+  //  sortOrder: asc or desc
+  //  url: Use this specific URL instead of looking up the URL for the type/id.  This should only be used for bootstrapping schemas on startup.
+  //  @TODO depaginate: If the response is paginated, retrieve all the pages. (default: true)
   async findAll(ctx, { type, opt }) {
     const {
       getters, commit, dispatch, rootGetters
     } = ctx;
 
     opt = opt || {};
+
     type = getters.normalizeType(type);
 
     if ( !getters.typeRegistered(type) ) {
@@ -150,7 +159,11 @@ export default {
     }
 
     // No need to request the resources if we have them already
-    if ( opt.force !== true && (getters['haveAll'](type) || getters['haveAllNamespace'](type, opt.namespaced))) {
+    if (
+      !getters.advancedWorkerCompatible &&
+      opt.force !== true &&
+      (getters['haveAll'](type) || getters['haveAllNamespace'](type, opt.namespaced))
+    ) {
       const args = {
         type,
         revision:  '',
@@ -251,7 +264,11 @@ export default {
         dispatch('resource-fetch/updateManualRefreshIsLoading', true, { root: true });
       }
 
-      const res = await dispatch('request', { opt, type });
+      const namespace = opt.watchNamespace || opt.namespaced;
+
+      const res = await dispatch('request', {
+        opt, type, namespace, load
+      });
 
       if ( streamStarted ) {
         // Flush any remaining entries left over that didn't get loaded by onData
@@ -315,13 +332,11 @@ export default {
       }
     }
 
-    // ToDo: SM if we start a "bigger" watch (such as watch without a namespace vs a watch with a namespace), we should stop the stop the "smaller" watch so we don't have duplicate events coming back
     if ( opt.watch !== false ) {
       dispatch('watch', {
         type,
         revision:  out.revision,
-        namespace: opt.watchNamespace || opt.namespaced, // it could be either apparently
-        // ToDo: SM namespaced is sometimes a boolean and sometimes a string, I don't see it as especially broken but we should refactor that in the future
+        namespace: opt.watchNamespace || opt.namespaced, // it could be either
         force:     opt.forceWatch === true,
       });
     }
@@ -364,7 +379,6 @@ export default {
 
     opt.filter = opt.filter || {};
     opt.filter['labelSelector'] = selector;
-
     opt.url = getters.urlFor(type, null, opt);
     opt.depaginate = typeOptions?.depaginate;
 
@@ -396,13 +410,6 @@ export default {
     return getters.matching( type, selector, namespace );
   },
 
-  // opt:
-  //  filter: Filter by fields, e.g. {field: value, anotherField: anotherValue} (default: none)
-  //  limit: Number of records to return per page (default: 1000)
-  //  sortBy: Sort by field
-  //  sortOrder: asc or desc
-  //  url: Use this specific URL instead of looking up the URL for the type/id.  This should only be used for bootstrapping schemas on startup.
-  //  @TODO depaginate: If the response is paginated, retrieve all the pages. (default: true)
   async find(ctx, { type, id, opt }) {
     if (!id) {
       console.error('Attempting to find a resource with no id', type, id); // eslint-disable-line no-console
@@ -430,7 +437,9 @@ export default {
     opt = opt || {};
     opt.url = getters.urlFor(type, id, opt);
 
-    const res = await dispatch('request', { opt, type });
+    const res = await dispatch('request', {
+      opt, type, id
+    });
 
     await dispatch('load', { data: res });
 

@@ -13,6 +13,7 @@ import { keyForSubscribe } from '@shell/plugins/steve/resourceWatcher';
 import { perfLoadAll } from '@shell/plugins/steve/performanceTesting';
 import Vue from 'vue';
 import { classify } from '@shell/plugins/dashboard-store/classify';
+import { createWorker } from '@shell/plugins/steve/subscribe';
 
 function registerNamespace(state, namespace) {
   let cache = state.podsByNamespace[namespace];
@@ -116,7 +117,7 @@ export default {
     }
   },
 
-  loadAll(state, {
+  async loadAll(state, {
     type,
     data,
     ctx,
@@ -140,11 +141,20 @@ export default {
 
     // Notify the web worker of the initial load of schemas
     if (type === SCHEMA) {
-      const worker = (this.$workers || {})[ctx.getters.storeName];
+      let worker = (this.$workers || {})[ctx.getters.storeName];
+
+      if (!worker && ctx.getters.advancedWorkerCompatible) {
+        // We've likely navigated away from a cluster at some point and cleared the $workers[storename] entry
+        await createWorker(this, ctx);
+        worker = (this.$workers || {})[ctx.getters.storeName];
+      }
 
       if (worker) {
         // Store raw json objects, not the proxies
-        worker.postMessage({ loadSchemas: data });
+        worker.postMessage({
+          loadSchemas: data,
+          createApi:   {},
+        });
       }
     }
   },

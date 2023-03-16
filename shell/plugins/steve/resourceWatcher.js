@@ -9,6 +9,7 @@ import Socket, {
   EVENT_CONNECTED,
 } from '@shell/utils/socket';
 import { addParam } from '@shell/utils/url';
+import Trace from '@shell/plugins/steve/trace';
 
 export const WATCH_STATUSES = {
   /**
@@ -72,9 +73,11 @@ export default class ResourceWatcher extends Socket {
   status = '';
   debugWatcher = false;
   csrf;
+  tracer;
 
   constructor(url, autoReconnect = true, frameTimeout = null, protocol = null, maxTries = null, csrf) {
     super(url, autoReconnect, frameTimeout, protocol, maxTries, true);
+    this.tracer = new Trace('Resource Watcher');
     this.baseUrl = self.location.origin + url.replace('subscribe', '');
     this.csrf = csrf;
 
@@ -99,11 +102,11 @@ export default class ResourceWatcher extends Socket {
   }
 
   trace(...args) {
-    this.debugWatcher && console.info('Resource Watcher:', ...args); // eslint-disable-line no-console
+    return this.tracer.trace(...args);
   }
 
   setDebug(on) {
-    this.debugWatcher = !!on;
+    return this.tracer.setDebug(!!on);
   }
 
   watchExists(watchKey) {
@@ -151,6 +154,7 @@ export default class ResourceWatcher extends Socket {
     if (!skipResourceVersion && (!resourceVersion || Date.now() - resourceVersionTime > 300000)) { // 300000ms is 5minutes
       this.trace('watch:', 'revision update required', watchKey);
 
+      // ToDo: SM this needs to accept a closure for the watch to resync itself instead of this fetch
       const resourceUrl = this.baseUrl + resourceType;
       const limitedResourceUrl = addParam(resourceUrl, 'limit', 1);
       const opt = {
