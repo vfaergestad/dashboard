@@ -79,8 +79,12 @@ export default {
             if (cssRules.selectorText && ((currTheme === 'light' && cssRules.selectorText.includes('body') &&
               cssRules.selectorText.includes('.theme-light') && cssRules.style.cssText.includes('--link:')) ||
               (currTheme === 'dark' && cssRules.selectorText.includes('.theme-dark')))) {
+              console.log('cssRules', cssRules);
               uiColor = mapStandardColors(cssRules.style.getPropertyValue(colors[this.color].color).trim());
               hoverColor = mapStandardColors(cssRules.style.getPropertyValue(colors[this.color].hover).trim());
+
+              console.log('uiColor', uiColor);
+              console.log('hoverColor', hoverColor);
               found = true;
               break;
             }
@@ -98,7 +102,14 @@ export default {
       const uiColorStr = `${ uiColorRGB.r }-${ uiColorRGB.g }-${ uiColorRGB.b }`;
       const hoverColorStr = `${ hoverColorRGB.r }-${ hoverColorRGB.g }-${ hoverColorRGB.b }`;
 
+      console.log('uiColorRGB', uiColorRGB);
+      console.log('hoverColorRGB', hoverColorRGB);
+      console.log('uiColorStr', uiColorStr);
+      console.log('hoverColorStr', hoverColorStr);
+
       const className = `svg-icon-${ uiColorStr }-${ hoverColorStr }`;
+
+      console.log('className', className);
 
       if (!cssCache[className]) {
         let hoverFilter = filterCache[hoverColor];
