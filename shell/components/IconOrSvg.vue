@@ -18,7 +18,7 @@
  */
 import Vue from 'vue';
 import { Solver } from '@shell/utils/svg-filter';
-import { colorToRgb, mapStandardColors } from '@shell/utils/color';
+import { colorToRgb, mapStandardColors, normalizeHex } from '@shell/utils/color';
 
 const filterCache = {};
 const cssCache = {};
