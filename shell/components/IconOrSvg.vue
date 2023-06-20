@@ -79,12 +79,12 @@ export default {
             if (cssRules.selectorText && ((currTheme === 'light' && cssRules.selectorText.includes('body') &&
               cssRules.selectorText.includes('.theme-light') && cssRules.style.cssText.includes('--link:')) ||
               (currTheme === 'dark' && cssRules.selectorText.includes('.theme-dark')))) {
-              console.log('cssRules', cssRules);
+              console.log('cssRules', cssRules); // eslint-disable-line no-console
               uiColor = mapStandardColors(cssRules.style.getPropertyValue(colors[this.color].color).trim());
               hoverColor = mapStandardColors(cssRules.style.getPropertyValue(colors[this.color].hover).trim());
 
-              console.log('uiColor', uiColor);
-              console.log('hoverColor', hoverColor);
+              console.log('uiColor', uiColor); // eslint-disable-line no-console
+              console.log('hoverColor', hoverColor); // eslint-disable-line no-console
               found = true;
               break;
             }
@@ -102,14 +102,14 @@ export default {
       const uiColorStr = `${ uiColorRGB.r }-${ uiColorRGB.g }-${ uiColorRGB.b }`;
       const hoverColorStr = `${ hoverColorRGB.r }-${ hoverColorRGB.g }-${ hoverColorRGB.b }`;
 
-      console.log('uiColorRGB', uiColorRGB);
-      console.log('hoverColorRGB', hoverColorRGB);
-      console.log('uiColorStr', uiColorStr);
-      console.log('hoverColorStr', hoverColorStr);
+      console.log('uiColorRGB', uiColorRGB); // eslint-disable-line no-console
+      console.log('hoverColorRGB', hoverColorRGB); // eslint-disable-line no-console
+      console.log('uiColorStr', uiColorStr); // eslint-disable-line no-console
+      console.log('hoverColorStr', hoverColorStr); // eslint-disable-line no-console
 
       const className = `svg-icon-${ uiColorStr }-${ hoverColorStr }`;
 
-      console.log('className', className);
+      console.log('className', className); // eslint-disable-line no-console
 
       if (!cssCache[className]) {
         let hoverFilter = filterCache[hoverColor];
