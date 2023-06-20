@@ -82,6 +82,11 @@ export default {
               console.log('cssRules', cssRules); // eslint-disable-line no-console
               uiColor = mapStandardColors(cssRules.style.getPropertyValue(colors[this.color].color).trim());
               hoverColor = mapStandardColors(cssRules.style.getPropertyValue(colors[this.color].hover).trim());
+              console.log('uiColor before', uiColor); // eslint-disable-line no-console
+              console.log('hoverColor before', hoverColor); // eslint-disable-line no-console
+
+              uiColor = normalizeHex(uiColor);
+              hoverColor = normalizeHex(hoverColor);
 
               console.log('uiColor', uiColor); // eslint-disable-line no-console
               console.log('hoverColor', hoverColor); // eslint-disable-line no-console
