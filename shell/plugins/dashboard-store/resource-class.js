@@ -1670,7 +1670,7 @@ export default class Resource {
     return errors;
   }
 
-  validationErrors(data = this, ignoreFields) {
+  async validationErrors(data = this, ignoreFields) {
     const errors = [];
     const {
       type: originalType,
@@ -1692,6 +1692,7 @@ export default class Resource {
       return errors;
     }
 
+    await schema.fetchResourceFields();
     const fields = schema.resourceFields || {};
     const keys = Object.keys(fields);
     let field, key, val, displayKey;
