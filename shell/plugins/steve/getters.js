@@ -213,7 +213,6 @@ export default {
     return cache.generation;
   },
 
-  // TODO: RC unit test?
   /**
    * Checks the norman or steve schema resourceFields for the given path
    */
