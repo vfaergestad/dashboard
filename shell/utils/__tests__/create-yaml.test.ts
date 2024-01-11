@@ -508,5 +508,3 @@ __clone: true
     expect(actual).toStrictEqual(expected);
   });
 });
-
-// TODO: RC unit test pathExistsInSchema
