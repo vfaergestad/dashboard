@@ -217,7 +217,7 @@ export default {
    * Checks the norman or steve schema resourceFields for the given path
    */
   pathExistsInSchema: (state, getters) => (type, path) => {
-    let schema = getters.schemaFor(type);
+    const schema = getters.schemaFor(type);
 
     if (schema.requiresResourceFields && !schema.hasResourceFields) {
       console.warn(`pathExistsInSchema requires schema ${ schema.id } to have resources fields via schema definition but none were found`); // eslint-disable-line no-console
@@ -227,12 +227,13 @@ export default {
 
     const schemaDefinitions = schema.requiresResourceFields ? schema.schemaDefinitions : null;
     const parts = splitObjectPath(path);
+    const schemaOrSchemaDefinition = schema;
 
     // Iterate down the parts (properties) until there are no parts left (success) or the path cannot be found (failure)
     while ( parts.length ) {
       const key = parts.shift();
 
-      const field = schema.resourceFields?.[key];
+      const field = schemaOrSchemaDefinition.resourceFields?.[key];
 
       type = field?.type;
 
@@ -243,7 +244,7 @@ export default {
       if ( parts.length ) {
         type = parseType(type, field).pop(); // Get the main part of array[map[something]] => something
 
-        schema = schemaDefinitions ? schemaDefinitions?.[type] : getters.schemaFor(type);
+        schemaOrSchemaDefinition = schemaDefinitions ? schemaDefinitions?.[type] : getters.schemaFor(type);
 
         if ( !schema ) {
           return false;
