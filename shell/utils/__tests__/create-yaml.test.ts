@@ -3,7 +3,6 @@ import {
   dumpBlock,
   createYaml,
 } from '@shell/utils/create-yaml';
-import { STEVE } from '@shell/config/types';
 import SteveSchema from '@shell/models/steve-schema';
 
 const key = 'example';
@@ -364,18 +363,14 @@ describe('fx: resourceFields', () => {
     }
   };
 
+  afterEach(() => { // eslint-disable-line jest/no-hooks
+    SteveSchema.reset();
+  });
+
   it('schema has empty resource fields', () => {
-    const configMapSteveSchema = new SteveSchema(configMapSchema, {
-      getters: {
-        byId: (type: string, id: string) => {
-          expect(type).toStrictEqual(STEVE.SCHEMA_DEFINITION);
+    const configMapSteveSchema = new SteveSchema(configMapSchema);
 
-          return forStore.find((f) => f.id === id);
-        },
-      }
-    });
-
-    const noResourceFields = {
+    configMapSteveSchema._cacheSchemaDefinitionResponse({
       ...configMapSchemaDefinition,
       definitions: {
         'io.k8s.api.core.v1.ConfigMap': {
@@ -383,14 +378,7 @@ describe('fx: resourceFields', () => {
           resourceFields: {}
         }
       }
-    };
-
-    const { self, others, forStore } = configMapSteveSchema._parseSchemaDefinitionResponse(noResourceFields);
-
-    configMapSteveSchema._schemaDefinitionsIds = {
-      self,
-      others
-    };
+    });
 
     // The data passed in and some 'ALWAYS_ADD' fields make it in
     const expected =
@@ -412,17 +400,9 @@ kind: ConfigMap`;
   });
 
   it('schema has one resource field', () => {
-    const configMapSteveSchema = new SteveSchema(configMapSchema, {
-      getters: {
-        byId: (type: string, id: string) => {
-          expect(type).toStrictEqual(STEVE.SCHEMA_DEFINITION);
+    const configMapSteveSchema = new SteveSchema(configMapSchema);
 
-          return forStore.find((f) => f.id === id);
-        },
-      }
-    });
-
-    const noResourceFields = {
+    configMapSteveSchema._cacheSchemaDefinitionResponse({
       ...configMapSchemaDefinition,
       definitions: {
         'io.k8s.api.core.v1.ConfigMap': {
@@ -435,14 +415,7 @@ kind: ConfigMap`;
           }
         }
       }
-    };
-
-    const { self, others, forStore } = configMapSteveSchema._parseSchemaDefinitionResponse(noResourceFields);
-
-    configMapSteveSchema._schemaDefinitionsIds = {
-      self,
-      others
-    };
+    });
 
     // The data passed in and some defaults from the schema make it in
     const expected =
@@ -465,22 +438,9 @@ kind: ConfigMap
   });
 
   it('schema has nested resource fields', () => {
-    const configMapSteveSchema = new SteveSchema(configMapSchema, {
-      getters: {
-        byId: (type: string, id: string) => {
-          expect(type).toStrictEqual(STEVE.SCHEMA_DEFINITION);
+    const configMapSteveSchema = new SteveSchema(configMapSchema);
 
-          return forStore.find((f) => f.id === id);
-        },
-      }
-    });
-
-    const { self, others, forStore } = configMapSteveSchema._parseSchemaDefinitionResponse(configMapSchemaDefinition);
-
-    configMapSteveSchema._schemaDefinitionsIds = {
-      self,
-      others
-    };
+    configMapSteveSchema._cacheSchemaDefinitionResponse(configMapSchemaDefinition);
 
     const expected =
       `apiVersion: v1
