@@ -438,7 +438,6 @@ function normalizeComponents(to, ___) {
   flatMapComponents(to, (Component, _, match, key) => {
     if (typeof Component === 'object' && !Component.options) {
       // Updated via vue-router resolveAsyncComponents()
-      Component = Vue.extend(Component);
       Component._Ctor = Component;
       match.components[key] = Component;
     }
@@ -551,7 +550,6 @@ function addHotReload($component, depth) {
     }
     if (typeof Component === 'object' && !Component.options) {
       // Updated via vue-router resolveAsyncComponents()
-      Component = Vue.extend(Component);
       Component._Ctor = Component;
     }
     this.error();
