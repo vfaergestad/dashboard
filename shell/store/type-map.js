@@ -2021,3 +2021,10 @@ function loadExtension(rootState, kind, key, fallback) {
 
   return fallback(key);
 }
+
+export default {
+  state,
+  getters,
+  actions,
+  mutations,
+};
