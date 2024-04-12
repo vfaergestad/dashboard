@@ -1,24 +1,23 @@
-/* eslint-disable no-undef */
+// /* eslint-disable no-undef */
 import { config } from '@vue/test-utils';
 import { directiveSsr as t } from '@shell/plugins/i18n';
 import VTooltip from 'v-tooltip';
 import vSelect from 'vue-select';
 import { VCleanTooltip } from '@shell/plugins/clean-tooltip-directive.js';
 import '@shell/plugins/replaceall';
-
-import { createApp } from 'vue';
-
 import { TextEncoder, TextDecoder } from 'util';
-const app = createApp({});
 
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-app.config.productionTip = false;
-app.use(VTooltip);
-app.use(VCleanTooltip);
-app.component('v-select', vSelect);
+// app.config.productionTip = false;
 
+config.global.directives['t'] = t;
+config.global.directives['clean-tooltip'] = VCleanTooltip ;
+config.global.components['v-select'] = vSelect;
+config.global.plugins = [VTooltip];
+config.global.mocks['t'] = key => `%${key}%`
+  
 /**
  * Global configuration for Jest tests
  */
@@ -47,7 +46,8 @@ beforeEach(() => {
   // config.mocks['$plugin'] = { getDynamic: () => undefined };
 
   // config.mocks['$store'] = { getters: { 'i18n/t': jest.fn() } };
-  config.directives = { t, 'clean-tooltip': VCleanTooltip };
+  config.global.directives['t'] = t;
+  config.global.directives['clean-tooltip'] = VCleanTooltip ;
 
   // Overrides some components
   // config.stubs['my-component'] = { template: "<div></div> "};
