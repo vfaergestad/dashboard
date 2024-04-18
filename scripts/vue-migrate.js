@@ -640,7 +640,7 @@ const setParams = () => {
   vueConfigUpdates();
   vueSyntaxUpdates();
   routerUpdates();
-  jestUpdates();
+  // jestUpdates();
   jestConfigUpdates();
   eslintUpdates();
   tsUpdates();
