@@ -44,6 +44,7 @@ describe('Nodes list', { tags: ['@explorer', '@adminUser'], testIsolation: 'off'
         expect(rows).not.to.equal(undefined);
         expect(rows).to.have.length(count);
       });
+    });
 
     // Check the node names
     nodeList.sortableTable().rowNames().should((names: any) => {
