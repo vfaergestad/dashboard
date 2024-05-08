@@ -20,7 +20,8 @@ env:
 jobs:
   build-and-upload-hosted:
     name: Build & Upload Hosted
-    runs-on: ubuntu-latest
+    container: ubuntu:latest
+    runs-on: org-${{ github.repository_owner_id }}-amd64-k8s
     steps:
       - uses: actions/checkout@v3
         with:
