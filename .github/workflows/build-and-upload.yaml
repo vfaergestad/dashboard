@@ -31,7 +31,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '14.x'
-          cache: 'yarn'
+
+      - name: Setup yarn
+        run: npm install -g yarn
+
+      - name: Setup Git
+        run: sudo apt install git
 
         # Build a directory containing the dashboard that can be used with ui-dashboard-index
       - id: build-hosted
@@ -68,7 +73,8 @@ jobs:
 
   build-and-upload-embedded:
     name: Build & Upload Embedded
-    runs-on: ubuntu-latest
+    container: ubuntu:latest
+    runs-on: org-${{ github.repository_owner_id }}-amd64-k8s
     steps:
       - uses: actions/checkout@v3
         with:
@@ -78,7 +84,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '14.x'
-          cache: 'yarn'
+
+      - name: Setup yarn
+        run: npm install -g yarn
+
+      - name: Setup Git
+        run: apt install git
 
         # Build a tar that will be picked up by rancher builds and embedded into it
       - id: build-embedded

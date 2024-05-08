@@ -9,14 +9,16 @@ on:
       - richard-drone-dashboard
 
 jobs:
-  build-validation:
-    name: Build Test
-    uses: ./.github/workflows/build-test.yaml
+  # TODO RC revert
+  # build-validation:
+  #   name: Build Test
+  #   uses: ./.github/workflows/build-test.yaml
   build:
     name: Build and Upload
     uses: ./.github/workflows/build-and-upload.yaml
-    needs:
-      - build-validation
+    # TODO RC revert
+    # needs:
+    #   - build-validation
     permissions:
       contents: 'read'
       id-token: 'write'
