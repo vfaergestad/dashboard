@@ -425,6 +425,17 @@ export default {
       } : undefined,
     });
 
+    // TODO: RC
+    if ( opt.watch !== false ) {
+      const args = {
+        type,
+        namespace: opt.watchNamespace || opt.namespaced, // it could be either apparently
+        force:     opt.forceWatch === true,
+      };
+
+      dispatch('watch', args);
+    }
+
     const all = findAllGetter(getters, type, opt);
 
     if (opt.hasManualRefresh) {
