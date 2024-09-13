@@ -107,8 +107,8 @@ class StevePaginationUtils extends NamespaceProjectFilters {
     '': [// all types
       { field: 'metadata.name' },
       { field: 'metadata.namespace' },
-      // { field: 'id' }, // Pending API support
-      // { field: 'metadata.state.name' }, // Pending API support
+      { field: 'id' },
+      { field: 'metadata.state.name' },
       { field: 'metadata.creationTimestamp' },
     ],
     [NODE]: [

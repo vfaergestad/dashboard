@@ -414,8 +414,9 @@ export default {
       data:       out.data,
       pagination: opt.pagination ? {
         request: {
-          namespace:  opt.namespaced,
-          pagination: opt.pagination
+          hasManualRefresh: opt.hasManualRefresh,
+          namespace:        opt.namespaced,
+          pagination:       opt.pagination
         },
         result: {
           count:     out.count,
