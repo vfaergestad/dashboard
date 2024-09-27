@@ -34,7 +34,7 @@ import { waitFor } from '@shell/utils/async';
 import { WORKER_MODES } from './worker';
 import acceptOrRejectSocketMessage from './accept-or-reject-socket-message';
 import { BLANK_CLUSTER, STORE } from '@shell/store/store-types.js';
-import paginationUtils from '@shell/utils/pagination-utils';
+// import paginationUtils from '@shell/utils/pagination-utils';
 
 // minimum length of time a disconnect notification is shown
 const MINIMUM_TIME_NOTIFIED = 3000;
@@ -326,9 +326,6 @@ const sharedActions = {
 
           if (msg.name) {
             dispatch(`ws.${ msg.name }`, msg);
-          } else {
-            // TODO: RC
-            dispatch(`ws.resource.changes`, msg);
           }
         }
       });
@@ -406,7 +403,8 @@ const sharedActions = {
       return;
     }
 
-    const isSteveCacheEnabled = paginationUtils.isSteveCacheEnabled({ rootGetters });
+    // TODO: RC can this all be removed?
+    // const isSteveCacheEnabled = paginationUtils.isSteveCacheEnabled({ rootGetters });
 
     // isSteveCacheEnabled check is temporary and will be removed once Part 3 of https://github.com/rancher/dashboard/pull/10349 is resolved by backend
     // Steve cache backed api does not return a revision, so `revision` here is always undefined
@@ -414,7 +412,8 @@ const sharedActions = {
     // That revision is probably too old and results in a watch error
     // Watch errors mean we make a http request to get latest revision (which is still missing) and try to re-watch with it...
     // etc
-    if (typeof revision === 'undefined' && !isSteveCacheEnabled) {
+    // && !typesNonGrata.includes(type)
+    if (typeof revision === 'undefined') {
       revision = getters.nextResourceVersion(type, id);
     }
 
@@ -430,8 +429,6 @@ const sharedActions = {
 
     if ( stop ) {
       msg.stop = true;
-    } else if ( isSteveCacheEnabled ) {
-      msg.mode = 'summary'; // TODO: RC
     }
 
     if ( id ) {
