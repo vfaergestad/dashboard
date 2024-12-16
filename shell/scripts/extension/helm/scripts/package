@@ -6,7 +6,7 @@ source $(dirname $0)/version
 cd $(dirname $0)/..
 
 if [[ -z ${ORG} ]] || [[ -z ${REPO} ]] || [[ -z ${TAG} ]] || [[ -z ${RUNTIME} ]]; then
-    echo "Usage: [REGISTRY=] ORG= REPO= TAG= RUNTIME= ./scripts/package"
+    echo "Usage: [REGISTRY=] ORG= REPO= TAG= RUNTIME= [NO_SSL_VERIFY=] [HTTP_PROXY=] [HTTPS_PROXY=] [NO_PROXY=] ./scripts/package"
     exit 1
 fi
 
@@ -14,12 +14,31 @@ IMAGE=${ORG}/${REPO}:${TAG}
 if [[ -n ${REGISTRY} ]]; then
     IMAGE=${REGISTRY%/}/${IMAGE}
 fi
+
 DOCKERFILE=package/Dockerfile
 if [ -e ${DOCKERFILE}.${ARCH} ]; then
     DOCKERFILE=${DOCKERFILE}.${ARCH}
 fi
 
-BUILD="${RUNTIME} build -f ${DOCKERFILE} -t ${IMAGE}"
+BUILD_ARGS=""
+
+# Pass through NO_SSL_VERIFY if set
+if [[ -n "${NO_SSL_VERIFY}" ]]; then
+    BUILD_ARGS+=" --build-arg NO_SSL_VERIFY=${NO_SSL_VERIFY}"
+fi
+
+# Pass through proxy variables if set
+if [[ -n "${HTTP_PROXY}" ]]; then
+    BUILD_ARGS+=" --build-arg HTTP_PROXY=${HTTP_PROXY}"
+fi
+if [[ -n "${HTTPS_PROXY}" ]]; then
+    BUILD_ARGS+=" --build-arg HTTPS_PROXY=${HTTPS_PROXY}"
+fi
+if [[ -n "${NO_PROXY}" ]]; then
+    BUILD_ARGS+=" --build-arg NO_PROXY=${NO_PROXY}"
+fi
+
+BUILD="${RUNTIME} build -f ${DOCKERFILE} -t ${IMAGE}${BUILD_ARGS}"
 
 if [[ ${RUNTIME} == "podman" ]]; then
     BUILD="$BUILD -v /var/lib/containers:/var/lib/containers ."
@@ -28,4 +47,4 @@ else
 fi
 
 $BUILD
-echo Built ${IMAGE}
+echo "Built ${IMAGE}"

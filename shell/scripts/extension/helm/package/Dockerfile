@@ -1,12 +1,12 @@
 FROM registry.suse.com/bci/bci-base:15.5
 
-ARG http_proxy
-ARG https_proxy
-ARG no_proxy
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
 
-ENV http_proxy=$http_proxy
-ENV https_proxy=$https_proxy
-ENV no_proxy=$no_proxy
+ENV HTTP_PROXY=$HTTP_PROXY
+ENV HTTPS_PROXY=$HTTPS_PROXY
+ENV NO_PROXY=$NO_PROXY
 
 ARG NO_SSL_VERIFY=false
 # If NO_SSL_VERIFY is true, then modify the baseurl line to disable SSL verification
